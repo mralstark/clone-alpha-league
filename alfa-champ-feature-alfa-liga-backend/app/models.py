@@ -11,6 +11,14 @@ from app.db import Base
 
 JSON_VALUE = JSON().with_variant(JSONB, "postgresql")
 
+# Optional pgvector support: use native Vector column in Postgres when available
+try:
+    from pgvector.sqlalchemy import Vector  # type: ignore
+    EMBEDDING_COLUMN_TYPE = Vector(384)
+except Exception:
+    EMBEDDING_COLUMN_TYPE = JSON_VALUE
+
+
 
 def utc_now() -> datetime:
     return datetime.now(UTC)
@@ -192,6 +200,6 @@ class KnowledgeBaseEntry(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     action_items: Mapped[list[dict[str, Any]]] = mapped_column(JSON_VALUE, nullable=False, default=list)
     associated_products: Mapped[list[str]] = mapped_column(JSON_VALUE, nullable=False, default=list)
-    # Для совместимости с SQLite тестами хранится как JSON-список float
-    embedding: Mapped[list[float]] = mapped_column(JSON_VALUE, nullable=False)
+    # embedding column uses Vector(384) on Postgres with pgvector, otherwise JSON for SQLite
+    embedding: Mapped[list[float]] = mapped_column(EMBEDDING_COLUMN_TYPE, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
