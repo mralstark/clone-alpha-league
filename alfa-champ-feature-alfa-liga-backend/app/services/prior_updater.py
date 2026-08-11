@@ -10,7 +10,7 @@ import yaml
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import DecisionLog
+# DecisionLog is not present; experiments/outcomes are used instead
 
 logger = logging.getLogger("alfa_liga.prior_updater")
 
