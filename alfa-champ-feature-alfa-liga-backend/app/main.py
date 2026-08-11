@@ -96,7 +96,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         # Ensure ORM models are imported so Base.metadata includes all tables (e.g., KnowledgeBaseEntry)
-        import app.models  # noqa: F401
+        # Use importlib to avoid binding the name 'app' in this function's locals
+        import importlib
+        importlib.import_module('app.models')  # noqa: F401
 
         db.create_schema()
         with db.session_factory() as session:
@@ -116,7 +118,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             db.dispose()
             logger.info("application_stopped")
 
-    app = FastAPI(
+    api_app = FastAPI(
         title="Альфа-Лига API",
         version="0.1.0",
         description=(
@@ -125,7 +127,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         ),
         lifespan=lifespan,
     )
-    app.add_middleware(
+    api_app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=True,
@@ -133,20 +135,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.state.settings = settings
-    app.state.db = db
-    app.state.state_adapter = state_adapter
-    app.state.product_gateway = product_gateway
-    app.state.decision_service = decision_service
-    app.state.experiment_service = experiment_service
-    app.include_router(router)
-    app.mount("/web", StaticFiles(directory=FRONTEND_DIR, html=True), name="web")
+    api_app.state.settings = settings
+    api_app.state.db = db
+    api_app.state.state_adapter = state_adapter
+    api_app.state.product_gateway = product_gateway
+    api_app.state.decision_service = decision_service
+    api_app.state.experiment_service = experiment_service
+    api_app.include_router(router)
+    api_app.mount("/web", StaticFiles(directory=FRONTEND_DIR, html=True), name="web")
 
-    @app.get("/", include_in_schema=False)
+    @api_app.get("/", include_in_schema=False)
     def frontend_home() -> RedirectResponse:
         return RedirectResponse(url="/web/alfa-league.html")
 
-    @app.middleware("http")
+    @api_app.middleware("http")
     async def request_log(request: Request, call_next):  # type: ignore[no-untyped-def]
         started = time.perf_counter()
         response = await call_next(request)
@@ -162,11 +164,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return response
 
     # Ensure DB schema exists and demo data seeded even if lifespan isn't entered (tests rely on this)
-    import app.models  # noqa: F401
+    # Avoid binding 'app' name in locals when importing submodules
+    import importlib
+    importlib.import_module('app.models')  # noqa: F401
     db.create_schema()
     with db.session_factory() as session:
         seed_demo_data(session)
 
-    return app
+    return api_app
 
 
