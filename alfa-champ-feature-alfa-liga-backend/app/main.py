@@ -161,6 +161,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         return response
 
+    # Ensure DB schema exists and demo data seeded even if lifespan isn't entered (tests rely on this)
+    import app.models  # noqa: F401
+    db.create_schema()
+    with db.session_factory() as session:
+        seed_demo_data(session)
+
     return app
 
 
