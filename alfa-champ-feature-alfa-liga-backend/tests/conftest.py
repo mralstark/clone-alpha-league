@@ -27,11 +27,10 @@ def app(settings: Settings):
 
 
 @pytest.fixture(scope="session")
-def client(settings) -> Iterator[TestClient]:
-    """Create a TestClient using the provided test settings directly to avoid
-    any fixture name collisions with the package named 'app'."""
-    app_instance = create_app(settings)
-    with TestClient(app_instance) as test_client:
+def client(app) -> Iterator[TestClient]:
+    """Create a TestClient using the same app instance so tests can mutate
+    the app state (policy, adapters) and have the TestClient observe it."""
+    with TestClient(app) as test_client:
         yield test_client
 
 

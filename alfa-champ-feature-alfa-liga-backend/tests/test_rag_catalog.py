@@ -29,6 +29,7 @@ def test_search_similar_sprints(app):
             embedding=service.encode_text(service.build_context_query("HoReCa", "56.10", "retention_rate", 10.0)),
         )
         session.add(entry)
+        session.commit()
 
     with db.session_factory() as session:
         results = service.search_similar_sprints(

@@ -8,14 +8,22 @@ Golden path не зависит от внешней LLM. Если локальн
 
 ```bash
 python3.12 -m venv .venv
-source .venv/bin/activate
+# Windows: .\.venv\Scripts\Activate.ps1  or .\.venv\Scripts\activate.bat
+# Unix: source .venv/bin/activate
 pip install -e '.[dev]'
 cp .env.example .env
 
+# Create DB schema and run migrations
 alembic upgrade head
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
 
+# Recommended: start via the repository-root ASGI entrypoint
+# (avoids package import-time side effects):
+# Unix / macOS
+# export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+# uvicorn asgi:application --host 0.0.0.0 --port 8000 --log-level info
+# Windows PowerShell
+# $env:OPENBLAS_NUM_THREADS='1'; $env:OMP_NUM_THREADS='1'; uvicorn asgi:application --host 0.0.0.0 --port 8000 --log-level info
+```
 После старта:
 
 - web-интерфейс: `http://localhost:8000/`;
