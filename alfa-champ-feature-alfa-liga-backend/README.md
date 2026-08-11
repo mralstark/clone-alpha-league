@@ -18,7 +18,11 @@ alembic upgrade head
 
 # Recommended: start via the repository-root ASGI entrypoint
 # (avoids package import-time side effects):
-uvicorn asgi:app --host 0.0.0.0 --port 8000 --log-level info
+# Unix / macOS
+# export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+# uvicorn asgi:application --host 0.0.0.0 --port 8000 --log-level info
+# Windows PowerShell
+# $env:OPENBLAS_NUM_THREADS='1'; $env:OMP_NUM_THREADS='1'; uvicorn asgi:application --host 0.0.0.0 --port 8000 --log-level info
 ```
 После старта:
 
