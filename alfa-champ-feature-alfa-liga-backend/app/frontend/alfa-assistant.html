@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Альфа-Лига | ИИ-Ассистент</title>
+
+    <!-- Шрифт Inter (Альфа-стиль) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Иконки FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Настройка брендовых цветов Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        alfa: {
+                            red: '#EF3124',
+                            dark: '#1A1A1A',
+                            gray: '#F4F5F7',
+                            lightRed: '#FFEBEA'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 12px 24px -8px rgba(0, 0, 0, 0.08)',
+                        'panel': '0 0 40px -10px rgba(0, 0, 0, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F4F5F7;
+            color: #1A1A1A;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Кастомный скроллбар для эстетики */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+        /* === Стилизация Range Ползунков === */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            background: linear-gradient(to right, #EF3124 50%, #E5E7EB 50%);
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid #EF3124;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(239, 49, 36, 0.3);
+            transition: transform 0.1s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        input[type=range]::-moz-range-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid #EF3124;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(239, 49, 36, 0.3);
+        }
+
+        /* Анимация чата */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chat-message { animation: fadeIn 0.3s ease-out forwards; }
+
+        /* Выезжающая панель истории */
+        .sidebar-overlay {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .history-sidebar {
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .history-sidebar.active {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen relative flex flex-col">
+
+    <!-- КОНТЕЙНЕР ДЛЯ ШАПКИ И КОНТЕНТА -->
+    <div class="flex-1 w-full max-w-screen-2xl mx-auto p-4 md:p-6 flex flex-col z-10">
+
+        <!-- Верхнее меню (Шапка) -->
+        <header class="w-full flex items-center justify-between bg-white p-4 rounded-2xl shadow-soft mb-6 shrink-0 z-20 relative">
+            <div class="flex items-center gap-4">
+                <a href="alfa-league.html" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-alfa-dark hover:bg-gray-200 hover:text-alfa-red transition group">
+                    <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                </a>
+                <h1 class="text-xl md:text-2xl font-bold tracking-tight">
+                    <span class="text-alfa-red border-b-4 border-alfa-red pb-1">AI</span>-Моделирование
+                </h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex flex-col text-right mr-2">
+                    <span class="text-sm font-bold">Алексей П.</span>
+                    <span class="text-xs text-gray-500">Мой бизнес</span>
+                </div>
+                <div class="w-12 h-12 bg-alfa-lightRed rounded-full flex items-center justify-center text-alfa-red font-bold border border-red-100">
+                    А
+                </div>
+            </div>
+        </header>
+
+        <!-- Основной контент (Сетка) -->
+        <main class="w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[700px] lg:h-[calc(100vh-140px)] relative">
+
+            <!-- ЛЕВАЯ КОЛОНКА (Настройки параметров). Сделали шире: col-span-8 -->
+            <div class="lg:col-span-8 flex flex-col bg-white rounded-[24px] shadow-soft overflow-hidden h-full">
+                <div class="p-6 border-b border-gray-100 shrink-0 bg-white z-10 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold">Сценарий решения</h2>
+                        <p class="text-gray-500 text-sm mt-1">Live-метрики приходят из backend, действия и лимиты задаёте вы</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+                        <label for="scenarioType" class="sr-only">Тип сценария</label>
+                        <select id="scenarioType" class="bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-alfa-red/30">
+                            <option value="AUTO">Определить по вопросу</option>
+                            <option value="GENERATE">Подобрать 3 идеи</option>
+                            <option value="MORNING_DISCOUNT">Проверить скидку</option>
+                            <option value="REPEAT_BONUS">Проверить бонус</option>
+                            <option value="MICRO_AD_TEST">Проверить рекламу</option>
+                            <option value="PRICE_CHANGE">Проверить цену</option>
+                            <option value="OPENING_HOURS_CHANGE">Проверить часы работы</option>
+                            <option value="PRODUCT_BUNDLE">Проверить набор</option>
+                            <option value="NO_ACTION">Ничего не менять</option>
+                        </select>
+                        <button type="button" onclick="resetSliders()" class="text-sm text-alfa-red font-semibold hover:bg-alfa-lightRed px-4 py-2 rounded-lg transition">
+                            Сбросить
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6" id="slidersContainer">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8" id="slidersGrid">
+                        <!-- Ползунки сгенерируются в JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ПРАВАЯ КОЛОНКА (Чат с ИИ). Сделали у́же и плотнее: col-span-4 -->
+            <div class="lg:col-span-4 bg-white rounded-[24px] shadow-soft flex flex-col relative overflow-hidden h-full">
+
+                <!-- Шапка чата -->
+                <div class="p-4 md:p-5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gradient-to-r from-gray-50 to-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-[#FFD6D6] to-[#FFBABA] rounded-full flex items-center justify-center text-xl shadow-sm">
+                            🤖
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg leading-tight">Альфа ИИ</h3>
+                            <span class="text-xs text-gray-500 font-semibold flex items-center gap-1">
+                                <span id="apiStatusDot" class="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse"></span>
+                                <span id="apiStatusText">Подключаю backend</span>
+                            </span>
+                        </div>
+                    </div>
+                    <button onclick="toggleHistory()" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                </div>
+
+                <!-- Зона сообщений (Теперь прижата к низу) -->
+                <!-- Обертка со скроллом -->
+                <div class="flex-1 overflow-y-auto p-4 md:p-5 bg-gray-50/50 flex flex-col" id="chatScroll">
+                    <!-- mt-auto отталкивает контейнер с сообщениями в самый низ -->
+                    <div class="mt-auto flex flex-col gap-4 w-full" id="chatMessages">
+                        <div class="flex gap-3 max-w-[90%] chat-message">
+                            <div class="w-8 h-8 rounded-full bg-[#FFD6D6] flex items-center justify-center text-sm shrink-0 mt-1">🤖</div>
+                            <div class="bg-white p-4 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100">
+                                <p class="text-sm text-gray-800">Привет! Я ИИ-ассистент Альфа-Банка. Настройте параметры слева и напишите мне, какую цель вы хотите достичь. Например: <br><br><i>"Как увеличить прибыль на 20% к концу года?"</i></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ввод сообщения -->
+                <div class="p-4 bg-white border-t border-gray-100 shrink-0">
+                    <div class="relative flex items-center">
+                        <input type="text" id="chatInput" placeholder="Опишите задачу или вопрос..." class="w-full bg-gray-100 border-none rounded-full py-3.5 pl-5 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-alfa-red/30 transition shadow-inner">
+                        <button type="button" id="sendButton" aria-label="Отправить запрос на моделирование" onclick="sendDataToAI()" class="absolute right-1.5 w-9 h-9 bg-alfa-red text-white rounded-full flex items-center justify-center hover:bg-red-600 transition hover:-translate-y-0.5 shadow-sm disabled:opacity-50 disabled:cursor-wait">
+                            <i class="fa-solid fa-paper-plane text-sm -ml-0.5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Выезжающая панель истории (Sidebar) -->
+                <div id="sidebarOverlay" class="absolute inset-0 sidebar-overlay z-20" onclick="toggleHistory()"></div>
+                <div id="historySidebar" class="absolute top-0 right-0 h-full w-[85%] max-w-[320px] bg-white shadow-panel z-30 history-sidebar flex flex-col">
+                    <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+                        <h3 class="font-bold text-lg">История сессий</h3>
+                        <button onclick="toggleHistory()" class="text-gray-400 hover:text-gray-700">
+                            <i class="fa-solid fa-xmark text-xl"></i>
+                        </button>
+                    </div>
+                    <div id="historyList" class="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+                        <!-- Динамически -->
+                    </div>
+                    <div class="p-4 border-t border-gray-100">
+                        <button onclick="createNewChat()" class="w-full py-3 rounded-xl text-alfa-red bg-alfa-lightRed font-semibold text-sm hover:bg-red-100 transition shadow-sm">
+                            + Новый чат
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ПОДВАЛ (Футер Альфа-Банка) - На всю ширину -->
+    <footer class="w-full bg-alfa-dark text-white pt-12 pb-12 px-4 md:px-16 mt-auto z-10 shadow-2xl border-t border-gray-800 flex-shrink-0">
+        <div class="max-w-[1440px] mx-auto w-full">
+            <div class="mb-12 text-sm font-medium flex items-center text-gray-300">
+                <a href="#" class="hover:text-white transition">Малый бизнес и ИП</a>
+                <i class="fa-solid fa-chevron-right text-[10px] mx-3 text-gray-500"></i>
+                <a href="#" class="hover:text-white transition">Банк для ИП</a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 mb-12">
+                <div class="flex flex-col gap-6">
+                    <div>
+                        <h4 class="text-[12px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-5">Связь с банком</h4>
+                        <div class="mb-5">
+                            <p class="text-xs text-gray-400 mb-1.5 font-medium">Бизнесу</p>
+                            <a href="#" class="text-lg font-bold hover:text-alfa-red transition block">+7 495 755 58 58</a>
+                        </div>
+                        <div class="mb-5">
+                            <p class="text-xs text-gray-400 mb-1.5 font-medium">Частным лицам</p>
+                            <a href="#" class="text-[15px] font-semibold hover:text-alfa-red transition block">Звонок в банк</a>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1.5 font-medium">Звонок из-за границы</p>
+                            <a href="#" class="text-[15px] font-bold hover:text-alfa-red transition block">+7 495 788 88 78</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <h4 class="text-[12px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-5">Сервисы</h4>
+                    <ul class="flex flex-col gap-3.5 text-[15px] font-medium text-gray-200">
+                        <li><a href="#" class="hover:text-alfa-red transition">Курсы валют</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Курсы металлов</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Отделения</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Банкоматы</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Активация карты</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Конструктор сайтов</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">А-Клуб</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Акции и предложения</a></li>
+                    </ul>
+                </div>
+
+                <div class="flex flex-col">
+                    <h4 class="text-[12px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-5">Банк</h4>
+                    <ul class="flex flex-col gap-3.5 text-[15px] font-medium text-gray-200">
+                        <li><a href="#" class="hover:text-alfa-red transition">О банке</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Пресс-служба</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Вакансии</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Реквизиты</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Тарифы и документы</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Должникам и взыскателям</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Закупки</a></li>
+                    </ul>
+                </div>
+
+                <div class="flex flex-col">
+                    <h4 class="text-[12px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-5">Поддержка</h4>
+                    <ul class="flex flex-col gap-3.5 text-[15px] font-medium text-gray-200">
+                        <li><a href="#" class="hover:text-alfa-red transition">Обращение в банк</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Справочный центр</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Блог</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Безопасность</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Иностранным гражданам</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Карта сайта</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">График работы</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pt-10 border-t border-gray-800/80">
+                <div>
+                    <h4 class="text-[11px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-4">Местоположение</h4>
+                    <a href="#" class="inline-flex items-center gap-2.5 text-white hover:text-alfa-red transition font-bold text-[15px]">
+                        <i class="fa-regular fa-paper-plane text-lg"></i> Москва
+                    </a>
+                </div>
+                <div>
+                    <h4 class="text-[11px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-4">Скачать приложение</h4>
+                    <a href="#" class="inline-flex items-center gap-3 group hover:opacity-80 transition">
+                        <div class="w-9 h-9 bg-[#2A2B2D] rounded-xl flex items-center justify-center font-bold text-white text-sm border border-gray-700 group-hover:bg-alfa-red transition-colors">
+                            А
+                        </div>
+                        <span class="text-[15px] text-gray-200 font-medium group-hover:text-white transition-colors">Альфа-Бизнес</span>
+                    </a>
+                </div>
+                <div>
+                    <h4 class="text-[11px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-4">Для иностранных клиентов</h4>
+                    <div class="flex items-center gap-6">
+                        <a href="#" class="flex items-center gap-2 group hover:opacity-80 transition">
+                            <div class="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center overflow-hidden border border-gray-700">
+                               <span class="text-[12px] leading-none">🇨🇳</span>
+                            </div>
+                            <span class="text-[15px] text-gray-200 font-medium group-hover:text-white transition">中文</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-2 group hover:opacity-80 transition">
+                             <div class="w-7 h-7 rounded-full bg-blue-800 flex items-center justify-center overflow-hidden border border-gray-700 relative">
+                                <span class="text-[12px] leading-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">🇬🇧</span>
+                            </div>
+                            <span class="text-[15px] text-gray-200 font-medium group-hover:text-white transition">Eng</span>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-[11px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-4">Наши соцсети</h4>
+                    <div class="flex items-center gap-3">
+                        <a href="#" class="w-10 h-10 bg-[#0088cc] rounded-full flex items-center justify-center text-white hover:-translate-y-1 hover:shadow-lg transition-transform text-lg shadow-sm">
+                            <i class="fa-brands fa-telegram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-[#2787F5] rounded-full flex items-center justify-center text-white hover:-translate-y-1 hover:shadow-lg transition-transform text-lg shadow-sm">
+                            <i class="fa-brands fa-vk"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="alfa-api.js"></script>
+    <script src="alfa-assistant.js"></script>
+</body>
+</html>

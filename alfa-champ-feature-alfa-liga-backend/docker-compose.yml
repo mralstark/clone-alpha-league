@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: alfa_liga
+      POSTGRES_USER: alfa
+      POSTGRES_PASSWORD: alfa
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alfa -d alfa_liga"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+    volumes:
+      - alfa_liga_postgres:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    environment:
+      APP_ENV: docker
+      DATABASE_URL: postgresql+psycopg://alfa:alfa@db:5432/alfa_liga
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  alfa_liga_postgres:
+

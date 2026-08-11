@@ -1,0 +1,145 @@
+MORNING_DISCOUNT:
+  confidence: 0.76
+  assumptions:
+    - Утренняя загрузка позволяет принять дополнительный спрос без очередей.
+    - Скидка действует только в указанные часы и не применяется ко всему обороту.
+  effects:
+    - metric: demand_multiplier
+      distribution: triangular
+      minimum: 1.04
+      mode: 1.14
+      maximum: 1.28
+      direction: UP
+      dependency: discount_pct
+    - metric: affected_share
+      distribution: uniform
+      minimum: 0.10
+      mode: null
+      maximum: 0.22
+      direction: MIXED
+
+REPEAT_BONUS:
+  confidence: 0.70
+  assumptions:
+    - Бонус доступен только после повторной покупки и имеет ограниченный срок.
+    - Доля вернувшихся клиентов меняется постепенно.
+  effects:
+    - metric: repeat_multiplier
+      distribution: triangular
+      minimum: 1.03
+      mode: 1.10
+      maximum: 1.20
+      direction: UP
+      dependency: bonus_pct
+    - metric: affected_share
+      distribution: uniform
+      minimum: 0.12
+      mode: null
+      maximum: 0.28
+      direction: MIXED
+
+MICRO_AD_TEST:
+  confidence: 0.58
+  assumptions:
+    - Реклама запускается как ограниченный тест с дневным лимитом.
+    - Эффект рекламы не гарантирован и измеряется инкрементально.
+  low_confidence_reasons:
+    - В fixture отсутствует надёжная маркетинговая атрибуция.
+  effects:
+    - metric: ad_revenue_multiplier
+      distribution: triangular
+      minimum: 0.85
+      mode: 1.12
+      maximum: 1.55
+      direction: MIXED
+      dependency: ad_budget
+    - metric: affected_share
+      distribution: uniform
+      minimum: 0.08
+      mode: null
+      maximum: 0.20
+      direction: MIXED
+
+PRODUCT_BUNDLE:
+  confidence: 0.68
+  assumptions:
+    - Набор предлагается только в периоды свободной мощности.
+  effects:
+    - metric: ticket_multiplier
+      distribution: triangular
+      minimum: 1.02
+      mode: 1.08
+      maximum: 1.18
+      direction: UP
+      dependency: bundle_discount_pct
+    - metric: affected_share
+      distribution: uniform
+      minimum: 0.10
+      mode: null
+      maximum: 0.24
+      direction: MIXED
+
+PRICE_CHANGE:
+  confidence: 0.62
+  assumptions:
+    - Эластичность спроса является демонстрационным допущением.
+  effects:
+    - metric: demand_multiplier
+      distribution: triangular
+      minimum: 0.82
+      mode: 0.94
+      maximum: 1.04
+      direction: DOWN
+      dependency: price_change_pct
+    - metric: ticket_multiplier
+      distribution: triangular
+      minimum: 1.01
+      mode: 1.05
+      maximum: 1.10
+      direction: UP
+      dependency: price_change_pct
+
+OPENING_HOURS_CHANGE:
+  confidence: 0.55
+  assumptions:
+    - Дополнительные часы требуют смены персонала и обратимого пилота.
+  low_confidence_reasons:
+    - Нет фактических данных о спросе вне текущих часов.
+  effects:
+    - metric: demand_multiplier
+      distribution: triangular
+      minimum: 0.98
+      mode: 1.04
+      maximum: 1.14
+      direction: MIXED
+      dependency: opening_hour
+    - metric: affected_share
+      distribution: uniform
+      minimum: 0.05
+      mode: null
+      maximum: 0.15
+      direction: MIXED
+
+NO_ACTION:
+  confidence: 1.0
+  assumptions:
+    - Изменение не запускается; состояние бизнеса остаётся базовой линией.
+  effects:
+    - metric: demand_multiplier
+      distribution: uniform
+      minimum: 1.0
+      mode: null
+      maximum: 1.0
+      direction: MIXED
+
+REQUEST_DATA:
+  confidence: 1.0
+  assumptions:
+    - Сначала требуется восстановить критические данные.
+  effects:
+    - metric: demand_multiplier
+      distribution: uniform
+      minimum: 1.0
+      mode: null
+      maximum: 1.0
+      direction: MIXED

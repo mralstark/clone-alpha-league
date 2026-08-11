@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Альфа-Лига | Цифровая Бухгалтерия</title>
+
+    <!-- Подключение шрифта Inter (максимально близок к Alfa Sans) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Иконки FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Подключение Leaflet для интерактивной карты -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Настройка брендовых цветов Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        alfa: {
+                            red: '#EF3124',
+                            dark: '#1A1A1A',
+                            gray: '#F4F5F7',
+                            lightRed: '#FFEBEA',
+                            green: '#00A843'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 12px 24px -8px rgba(0, 0, 0, 0.08)',
+                        'panel': '0 0 40px -10px rgba(0, 0, 0, 0.15)',
+                        'red-glow': '0 8px 24px -4px rgba(239, 49, 36, 0.4)',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.4s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F4F5F7;
+            color: #1A1A1A;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Кастомный скроллбар */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+        /* Эффекты карточек */
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Прогресс-бар для налоговой копилки */
+        @keyframes fillProgress { from { width: 0; } }
+        .progress-fill { animation: fillProgress 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+        /* Стили модального окна */
+        .modal-overlay {
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            transform: scale(0.95) translateY(20px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        /* Линии таймлайна для налогового календаря */
+        .timeline-line {
+            position: absolute;
+            left: 11px;
+            top: 24px;
+            bottom: -24px;
+            width: 2px;
+            background-color: #E5E7EB;
+            z-index: 0;
+        }
+        .timeline-item:last-child .timeline-line { display: none; }
+
+        /* Toast уведомления (Всплывашки) */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .toast {
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        /* Спиннер загрузки */
+        .spinner {
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 2px solid #fff;
+            width: 14px;
+            height: 14px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Корректировка z-index для карты, чтобы не перекрывала модальные окна */
+        .leaflet-pane { z-index: 10 !important; }
+        .leaflet-top, .leaflet-bottom { z-index: 10 !important; }
+    </style>
+</head>
+<body class="min-h-screen relative flex flex-col">
+
+    <!-- КОНТЕЙНЕР ДЛЯ ШАПКИ И КОНТЕНТА -->
+    <div class="flex-1 w-full p-4 md:p-8 flex flex-col z-10">
+
+        <!-- Шапка -->
+        <header class="max-w-7xl w-full mx-auto flex items-center justify-between mb-8 bg-white p-4 rounded-2xl shadow-soft relative">
+            <div class="flex items-center gap-4">
+                <a href="alfa-league.html" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-alfa-dark hover:bg-gray-200 hover:text-alfa-red transition group">
+                    <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                </a>
+                <h1 class="text-xl md:text-2xl font-bold tracking-tight">
+                    <span class="text-alfa-red border-b-4 border-alfa-red pb-1">Цифровая</span> Бухгалтерия
+                </h1>
+                <span data-api-state="loading" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" title="Загрузка данных бизнеса"></span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex flex-col text-right mr-2">
+                    <span class="text-sm font-bold">Алексей П.</span>
+                    <span class="text-xs text-gray-500">ИП (УСН 6%)</span>
+                </div>
+                <div class="w-12 h-12 bg-alfa-lightRed rounded-full flex items-center justify-center text-alfa-red font-bold border border-red-100">
+                    А
+                </div>
+            </div>
+        </header>
+
+        <!-- Основной контент -->
+        <main class="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+
+            <!-- ВЕРХНИЙ РЯД: KPI (3 Карточки) -->
+            <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up">
+                <!-- Баланс -->
+                <div class="bg-gray-900 rounded-[24px] p-6 shadow-soft text-white relative overflow-hidden card-hover">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl -translate-y-10 translate-x-10"></div>
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <span class="text-gray-400 font-medium text-sm">Доступно на счетах</span>
+                        <i class="fa-brands fa-cc-visa text-2xl text-gray-400"></i>
+                    </div>
+                    <h2 id="accountingBalance" class="text-3xl lg:text-4xl font-bold mb-1 relative z-10">Загрузка…</h2>
+                    <div class="flex items-center gap-2 text-sm text-green-400 font-semibold relative z-10">
+                        <i class="fa-solid fa-wallet"></i> <span id="accountingRunway">Загрузка состояния</span>
+                    </div>
+                </div>
+
+                <!-- Налоговая копилка -->
+                <div class="bg-gradient-to-br from-[#FFEBEA] to-white rounded-[24px] p-6 shadow-soft border border-red-50 card-hover relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-alfa-red font-bold flex items-center gap-2 text-sm">
+                            <i class="fa-solid fa-vault"></i> Налоговая копилка
+                        </span>
+                        <span class="bg-white px-2 py-1 rounded-md text-[10px] font-bold text-gray-500 shadow-sm border border-gray-100">АВТО</span>
+                    </div>
+                    <div class="flex items-end gap-2 mb-4">
+                        <h2 id="accountingTaxReserve" class="text-2xl lg:text-3xl font-bold text-alfa-dark">Загрузка…</h2>
+                        <span id="accountingTaxPlan" class="text-sm text-gray-500 font-medium mb-1"></span>
+                    </div>
+                    <div class="h-2.5 w-full bg-red-100 rounded-full overflow-hidden mb-3">
+                        <div class="h-full bg-alfa-red rounded-full progress-fill" style="width: 91%;"></div>
+                    </div>
+                    <p class="text-xs text-gray-600 font-medium leading-tight">Мы автоматически откладываем 6% с каждого поступления. Вы готовы к налогам!</p>
+                </div>
+
+                <!-- Доходы / Расходы -->
+                <div class="bg-white rounded-[24px] p-6 shadow-soft card-hover flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-4">
+                        <span id="accountingWindow" class="text-gray-500 font-medium text-sm">Оборот за период</span>
+                        <div class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-400">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-end border-b border-gray-100 pb-2 mb-2">
+                        <span class="text-sm font-semibold text-gray-500">Доходы:</span>
+                        <span id="accountingRevenue" class="text-lg font-bold text-green-600">Загрузка…</span>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <span class="text-sm font-semibold text-gray-500">Расходы:</span>
+                        <span id="accountingExpenses" class="text-lg font-bold text-gray-900">Загрузка…</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ЛЕВАЯ КОЛОНКА (Действия и Транзакции) -->
+            <div class="lg:col-span-8 flex flex-col gap-6 animate-slide-up" style="animation-delay: 0.1s;">
+                <!-- Быстрые действия -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    <button onclick="openModal()" class="bg-alfa-red text-white p-4 rounded-[20px] shadow-red-glow hover:bg-red-600 transition hover:-translate-y-1 flex flex-col items-center justify-center gap-2 group">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-xl group-hover:scale-110 transition">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                        </div>
+                        <span class="text-xs font-bold text-center">Выставить<br>счет</span>
+                    </button>
+                    <button class="bg-white text-gray-700 p-4 rounded-[20px] shadow-soft hover:bg-gray-50 transition hover:-translate-y-1 flex flex-col items-center justify-center gap-2 group border border-transparent hover:border-gray-200">
+                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl group-hover:bg-gray-200 transition text-alfa-dark">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <span class="text-xs font-bold text-center">Сканировать<br>акт/чек</span>
+                    </button>
+                    <button class="bg-white text-gray-700 p-4 rounded-[20px] shadow-soft hover:bg-gray-50 transition hover:-translate-y-1 flex flex-col items-center justify-center gap-2 group border border-transparent hover:border-gray-200">
+                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl group-hover:bg-gray-200 transition text-alfa-dark">
+                            <i class="fa-solid fa-file-contract"></i>
+                        </div>
+                        <span class="text-xs font-bold text-center">Договоры<br>и акты</span>
+                    </button>
+                    <button class="bg-white text-gray-700 p-4 rounded-[20px] shadow-soft hover:bg-gray-50 transition hover:-translate-y-1 flex flex-col items-center justify-center gap-2 group border border-transparent hover:border-gray-200">
+                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl group-hover:bg-gray-200 transition text-alfa-dark">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                        <span class="text-xs font-bold text-center">Сверка<br>с ФНС</span>
+                    </button>
+                    <button onclick="toggleCreditDebit()" class="bg-white text-gray-700 p-4 rounded-[20px] shadow-soft hover:bg-gray-50 transition hover:-translate-y-1 flex flex-col items-center justify-center gap-2 group border border-transparent hover:border-alfa-red/30 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-red-50/50 opacity-0 group-hover:opacity-100 transition"></div>
+                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-xl group-hover:bg-alfa-lightRed group-hover:text-alfa-red transition text-alfa-dark relative z-10">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <span class="text-xs font-bold text-center relative z-10">Кредит /<br>Дебет</span>
+                    </button>
+                </div>
+
+                <!-- Панель Транзакции / Кредит-Дебет -->
+                <div class="bg-white rounded-[24px] p-6 shadow-soft flex-1 flex flex-col relative transition-all duration-300">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 id="panelTitle" class="text-xl font-bold">Лента операций</h2>
+                        <div class="flex gap-2 bg-gray-100 p-1 rounded-xl transition-opacity duration-300" id="filterButtons">
+                            <button onclick="filterTransactions('all', this)" class="px-4 py-1.5 bg-white text-alfa-dark font-semibold text-xs rounded-lg shadow-sm filter-btn">Все</button>
+                            <button onclick="filterTransactions('income', this)" class="px-4 py-1.5 text-gray-500 font-medium text-xs hover:text-alfa-dark transition rounded-lg filter-btn">Приход</button>
+                            <button onclick="filterTransactions('expense', this)" class="px-4 py-1.5 text-gray-500 font-medium text-xs hover:text-alfa-dark transition rounded-lg filter-btn">Расход</button>
+                        </div>
+                    </div>
+
+                    <div id="transactionsList" class="flex flex-col gap-4 overflow-y-auto pr-2" style="max-height: 400px;">
+                        <div class="transaction-item flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-100" data-type="income">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid fa-arrow-down"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm">ООО "ТехноПром"</h4>
+                                    <p class="text-xs text-gray-500 mt-0.5">Оплата по счету №45 от 12.06.26</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-green-600">+ 120 000 ₽</span>
+                                <span class="text-[10px] text-gray-400 font-medium">Сегодня, 14:30</span>
+                            </div>
+                        </div>
+                        <div class="transaction-item flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-100" data-type="expense">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid fa-briefcase"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm">Аренда помещения</h4>
+                                    <p class="text-xs text-gray-500 mt-0.5">БЦ "Альфа", июнь</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-gray-900">- 45 000 ₽</span>
+                                <span class="text-[10px] text-gray-400 font-medium">Вчера, 10:15</span>
+                            </div>
+                        </div>
+                        <div class="transaction-item flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-100" data-type="expense">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-red-100 text-alfa-red flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm">Уплата налога (УСН)</h4>
+                                    <p class="text-xs text-gray-500 mt-0.5">Авансовый платеж за 2 квартал</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-gray-900">- 32 400 ₽</span>
+                                <span class="text-[10px] text-gray-400 font-medium">10 Июня</span>
+                            </div>
+                        </div>
+                        <div class="transaction-item flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-100" data-type="income">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-lg shrink-0">
+                                    <i class="fa-solid fa-arrow-down"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm">ИП Иванов А.В.</h4>
+                                    <p class="text-xs text-gray-500 mt-0.5">Оказание консалтинговых услуг</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-green-600">+ 50 000 ₽</span>
+                                <span class="text-[10px] text-gray-400 font-medium">8 Июня</span>
+                            </div>
+                        </div>
+                        <div class="transaction-item flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-100" data-type="expense">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-[#FFEBEA] text-alfa-red flex items-center justify-center text-lg shrink-0 border border-red-100">
+                                    <i class="fa-solid fa-mug-hot"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm">Кофемашина для офиса</h4>
+                                    <p class="text-xs text-gray-500 mt-0.5">ООО "ТехноСтор"</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="block font-bold text-gray-900">- 85 000 ₽</span>
+                                <span class="text-[10px] text-gray-400 font-medium">5 Июня</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="creditDebitTable" class="hidden flex-col gap-0 overflow-y-auto pr-2" style="max-height: 400px; animation: fadeIn 0.4s ease-out;">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b-2 border-gray-100 text-xs text-gray-400 uppercase tracking-wider">
+                                    <th class="pb-3 pl-2 font-bold">Счет / Статья</th>
+                                    <th class="pb-3 font-bold text-right">Дебет (Приход)</th>
+                                    <th class="pb-3 pr-2 font-bold text-right">Кредит (Расход)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                <tr class="border-b border-gray-50 hover:bg-gray-50 transition group">
+                                    <td class="py-4 pl-2 font-semibold text-gray-800">51 Расчетные счета</td>
+                                    <td class="py-4 text-right text-green-600 font-bold">320 500 ₽</td>
+                                    <td class="py-4 pr-2 text-right text-gray-900 font-bold">140 200 ₽</td>
+                                </tr>
+                                <tr class="border-b border-gray-50 hover:bg-gray-50 transition group">
+                                    <td class="py-4 pl-2 font-semibold text-gray-800">60 Расчеты с поставщиками</td>
+                                    <td class="py-4 text-right text-green-600 font-bold opacity-50">-</td>
+                                    <td class="py-4 pr-2 text-right text-gray-900 font-bold">85 000 ₽</td>
+                                </tr>
+                                <tr class="border-b border-gray-50 hover:bg-gray-50 transition group">
+                                    <td class="py-4 pl-2 font-semibold text-gray-800">62 Расчеты с покупателями</td>
+                                    <td class="py-4 text-right text-green-600 font-bold">170 000 ₽</td>
+                                    <td class="py-4 pr-2 text-right text-gray-900 font-bold opacity-50">-</td>
+                                </tr>
+                                <tr class="border-b border-gray-50 hover:bg-gray-50 transition group">
+                                    <td class="py-4 pl-2 font-semibold text-gray-800">68 Налоги и сборы</td>
+                                    <td class="py-4 text-right text-green-600 font-bold opacity-50">-</td>
+                                    <td class="py-4 pr-2 text-right text-gray-900 font-bold">32 400 ₽</td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="font-bold text-gray-900 bg-gray-50 border-t-2 border-gray-200">
+                                <tr>
+                                    <td class="py-4 px-2 rounded-l-xl">Итого (Обороты за период)</td>
+                                    <td class="py-4 text-right text-green-600 text-base">490 500 ₽</td>
+                                    <td class="py-4 text-right pr-2 rounded-r-xl text-base">257 600 ₽</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <button id="panelActionBtn" class="w-full mt-4 py-3 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold text-sm rounded-xl transition">
+                        Показать все операции
+                    </button>
+                </div>
+            </div>
+
+            <!-- ПРАВАЯ КОЛОНКА (Календарь и AI-советы) -->
+            <div class="lg:col-span-4 flex flex-col gap-6 animate-slide-up" style="animation-delay: 0.2s;">
+                <div class="bg-gradient-to-br from-[#E2F5E2] to-[#C9EBC9] rounded-[24px] p-6 shadow-soft relative overflow-hidden card-hover">
+                    <div class="absolute -right-4 -bottom-4 text-7xl opacity-40 z-0">💡</div>
+                    <div class="flex items-center gap-3 mb-3 relative z-10">
+                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-green-600 shadow-sm text-lg">🤖</div>
+                        <h3 class="font-bold text-green-900 text-lg">AI Советник</h3>
+                    </div>
+                    <p class="text-sm text-green-800 font-medium relative z-10 mb-4 leading-relaxed">
+                        Я проанализировал ваши траты. Покупку кофемашины (85 000 ₽) можно провести как <b>представительские расходы</b>. Это легально снизит вашу налоговую базу.
+                    </p>
+                    <button id="aiActBtn" onclick="generateAIAct()" class="bg-white/60 hover:bg-white text-green-900 font-bold text-xs py-2 px-4 rounded-xl transition backdrop-blur relative z-10 shadow-sm flex items-center justify-center gap-2">
+                        <span>Сформировать акт списания</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-[24px] p-6 shadow-soft flex-1">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold">Налоговый календарь</h2>
+                        <div class="text-alfa-red hover:text-red-700 cursor-pointer text-sm font-semibold transition">В ФНС <i class="fa-solid fa-arrow-up-right-from-square text-xs ml-1"></i></div>
+                    </div>
+                    <div class="flex flex-col relative pl-2">
+                        <div class="timeline-item relative pl-8 pb-6">
+                            <div class="timeline-line"></div>
+                            <div class="absolute left-0 top-1 w-6 h-6 bg-alfa-red rounded-full flex items-center justify-center border-4 border-white shadow-sm z-10">
+                                <div class="w-2 h-2 bg-white rounded-full"></div>
+                            </div>
+                            <div class="bg-red-50 p-3 rounded-xl border border-red-100">
+                                <span class="text-[10px] font-bold text-alfa-red uppercase tracking-wider">Завтра, 25 июня</span>
+                                <h4 class="font-bold text-sm text-gray-900 mt-1">Уведомление об исчисленных налогах</h4>
+                                <div class="mt-2 flex items-center gap-2">
+                                    <span id="taxStatus" class="bg-white px-2 py-1 rounded text-xs font-bold text-gray-600 border border-gray-200 transition-colors">Готово к отправке</span>
+                                    <button id="taxSendBtn" onclick="sendTax()" class="text-alfa-red text-xs font-bold hover:underline transition-colors">Подписать и отправить</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-item relative pl-8 pb-6">
+                            <div class="timeline-line"></div>
+                            <div class="absolute left-0 top-1 w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center border-4 border-white shadow-sm z-10">
+                                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">28 июня</span>
+                                <h4 class="font-bold text-sm text-gray-800 mt-1">Уплата страховых взносов (ЕПС)</h4>
+                                <p class="text-xs text-gray-500 mt-1">Сумма: 14 500 ₽ (Деньги в копилке)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- НИЖНИЙ БЛОК (Интерактивная тепловая карта Москвы) -->
+            <div class="lg:col-span-12 mt-2 animate-slide-up" style="animation-delay: 0.3s;">
+                <div class="bg-white rounded-[24px] p-6 shadow-soft flex flex-col gap-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-map-location-dot text-alfa-red"></i>
+                            География клиентского трафика
+                        </h2>
+                        <span class="text-[10px] font-bold text-alfa-red bg-alfa-lightRed border border-red-100 px-3 py-1.5 rounded-lg tracking-wide">
+                            <i class="fa-solid fa-circle text-[8px] animate-pulse mr-1"></i> LIVE
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-500 mb-2">Анализ плотности оплат через эквайринг по районам Москвы. Помогает определить лучшие точки для открытия новых филиалов.</p>
+                    <div id="heatmapContainer" class="w-full h-[400px] rounded-2xl z-0 border border-gray-100 relative overflow-hidden bg-gray-50"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ПОДВАЛ (Футер Альфа-Банка) - На всю ширину без зазоров -->
+    <footer class="w-full bg-alfa-dark text-white pt-12 pb-12 px-4 md:px-16 mt-auto z-10 shadow-2xl border-t border-gray-800 flex-shrink-0">
+        <div class="max-w-[1440px] mx-auto w-full">
+            <!-- Breadcrumbs -->
+            <div class="mb-12 text-sm font-medium flex items-center text-gray-300">
+                <a href="#" class="hover:text-white transition">Малый бизнес и ИП</a>
+                <i class="fa-solid fa-chevron-right text-[10px] mx-3 text-gray-500"></i>
+                <a href="#" class="hover:text-white transition">Банк для ИП</a>
+            </div>
+
+            <!-- 4 Columns Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 mb-12">
+                <!-- Колонна 1: Связь с банком -->
+                <div class="flex flex-col gap-6">
+                    <div>
+                        <h4 class="text-[12px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-5">Связь с банком</h4>
+                        <div class="mb-5">
+                            <p class="text-xs text-gray-400 mb-1.5 font-medium">Бизнесу</p>
+                            <a href="#" class="text-lg font-bold hover:text-alfa-red transition block">+7 495 755 58 58</a>
+                        </div>
+                        <div class="mb-5">
+                            <p class="text-xs text-gray-400 mb-1.5 font-medium">Частным лицам</p>
+                            <a href="#" class="text-[15px] font-semibold hover:text-alfa-red transition block">Звонок в банк</a>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 mb-1.5 font-medium">Звонок из-за границы</p>
+                            <a href="#" class="text-[15px] font-bold hover:text-alfa-red transition block">+7 495 788 88 78</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Колонна 2: Сервисы -->
+                <div class="flex flex-col">
+                    <h4 class="text-[12px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-5">Сервисы</h4>
+                    <ul class="flex flex-col gap-3.5 text-[15px] font-medium text-gray-200">
+                        <li><a href="#" class="hover:text-alfa-red transition">Курсы валют</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Курсы металлов</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Отделения</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Банкоматы</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Активация карты</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Конструктор сайтов</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">А-Клуб</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Акции и предложения</a></li>
+                    </ul>
+                </div>
+
+                <!-- Колонна 3: Банк -->
+                <div class="flex flex-col">
+                    <h4 class="text-[12px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-5">Банк</h4>
+                    <ul class="flex flex-col gap-3.5 text-[15px] font-medium text-gray-200">
+                        <li><a href="#" class="hover:text-alfa-red transition">О банке</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Пресс-служба</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Вакансии</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Реквизиты</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Тарифы и документы</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Должникам и взыскателям</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Закупки</a></li>
+                    </ul>
+                </div>
+
+                <!-- Колонна 4: Поддержка -->
+                <div class="flex flex-col">
+                    <h4 class="text-[12px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-5">Поддержка</h4>
+                    <ul class="flex flex-col gap-3.5 text-[15px] font-medium text-gray-200">
+                        <li><a href="#" class="hover:text-alfa-red transition">Обращение в банк</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Справочный центр</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Блог</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Безопасность</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Иностранным гражданам</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">Карта сайта</a></li>
+                        <li><a href="#" class="hover:text-alfa-red transition">График работы</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Нижний ряд (Локация, Приложения, Языки, Соцсети) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pt-10 border-t border-gray-800/80">
+                <div>
+                    <h4 class="text-[11px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-4">Местоположение</h4>
+                    <a href="#" class="inline-flex items-center gap-2.5 text-white hover:text-alfa-red transition font-bold text-[15px]">
+                        <i class="fa-regular fa-paper-plane text-lg"></i> Москва
+                    </a>
+                </div>
+                <div>
+                    <h4 class="text-[11px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-4">Скачать приложение</h4>
+                    <a href="#" class="inline-flex items-center gap-3 group hover:opacity-80 transition">
+                        <div class="w-9 h-9 bg-[#2A2B2D] rounded-xl flex items-center justify-center font-bold text-white text-sm border border-gray-700 group-hover:bg-alfa-red transition-colors">
+                            А
+                        </div>
+                        <span class="text-[15px] text-gray-200 font-medium group-hover:text-white transition-colors">Альфа-Бизнес</span>
+                    </a>
+                </div>
+                <div>
+                    <h4 class="text-[11px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-4">Для иностранных клиентов</h4>
+                    <div class="flex items-center gap-6">
+                        <a href="#" class="flex items-center gap-2 group hover:opacity-80 transition">
+                            <div class="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center overflow-hidden border border-gray-700">
+                               <span class="text-[12px] leading-none">🇨🇳</span>
+                            </div>
+                            <span class="text-[15px] text-gray-200 font-medium group-hover:text-white transition">中文</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-2 group hover:opacity-80 transition">
+                             <div class="w-7 h-7 rounded-full bg-blue-800 flex items-center justify-center overflow-hidden border border-gray-700 relative">
+                                <span class="text-[12px] leading-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">🇬🇧</span>
+                            </div>
+                            <span class="text-[15px] text-gray-200 font-medium group-hover:text-white transition">Eng</span>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-[11px] font-bold text-gray-500 tracking-[0.1em] uppercase mb-4">Наши соцсети</h4>
+                    <div class="flex items-center gap-3">
+                        <a href="#" class="w-10 h-10 bg-[#0088cc] rounded-full flex items-center justify-center text-white hover:-translate-y-1 hover:shadow-lg transition-transform text-lg shadow-sm">
+                            <i class="fa-brands fa-telegram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-[#2787F5] rounded-full flex items-center justify-center text-white hover:-translate-y-1 hover:shadow-lg transition-transform text-lg shadow-sm">
+                            <i class="fa-brands fa-vk"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Модальное окно "Выставить счет" -->
+    <div id="invoiceModal" class="fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4 bg-alfa-dark/40">
+        <div class="modal-content bg-white w-full max-w-md rounded-[24px] shadow-panel overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-alfa-lightRed text-alfa-red rounded-full flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <h2 class="text-xl font-bold">Выставить счет</h2>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6 flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Контрагент (ИНН или Название)</label>
+                    <input type="text" placeholder="Введите ИНН..." value="ООО «Ромашка» (ИНН 7701234567)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-alfa-red/30 focus:border-alfa-red transition font-medium">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Сумма (₽)</label>
+                        <input type="number" placeholder="0.00" value="45000" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-alfa-red/30 focus:border-alfa-red transition font-bold text-lg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">НДС</label>
+                        <select class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-alfa-red/30 focus:border-alfa-red transition font-medium appearance-none">
+                            <option>Без НДС</option>
+                            <option>20%</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Назначение платежа</label>
+                    <textarea rows="2" placeholder="За какие услуги..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-alfa-red/30 focus:border-alfa-red transition font-medium resize-none">Оплата за разработку дизайна по договору №12 от 10.06</textarea>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-gray-100 flex gap-3">
+                <button onclick="closeModal()" class="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition text-sm">Отмена</button>
+                <button onclick="generateSuccess()" id="generateBtn" class="flex-[2] py-3.5 bg-alfa-red hover:bg-red-600 text-white font-bold rounded-xl transition shadow-red-glow text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bolt"></i> Сгенерировать ссылку
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер для всплывающих уведомлений -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="alfa-api.js"></script>
+    <script src="alfa-dashboard.js"></script>
+    <script>
+        // ==========================================
+        // БАЗОВАЯ ЛОГИКА (Модалки, ИИ, Toasts)
+        // ==========================================
+        const modal = document.getElementById('invoiceModal');
+        const generateBtn = document.getElementById('generateBtn');
+
+        function openModal() { modal.classList.add('active'); }
+        function closeModal() {
+            modal.classList.remove('active');
+            setTimeout(() => {
+                generateBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Сгенерировать ссылку';
+                generateBtn.classList.remove('bg-green-500', 'hover:bg-green-600', 'shadow-[0_8px_24px_-4px_rgba(0,168,67,0.4)]');
+                generateBtn.classList.add('bg-alfa-red', 'hover:bg-red-600', 'shadow-red-glow');
+            }, 300);
+        }
+        function generateSuccess() {
+            generateBtn.innerHTML = '<i class="fa-solid fa-check"></i> Ссылка скопирована!';
+            generateBtn.classList.remove('bg-alfa-red', 'hover:bg-red-600', 'shadow-red-glow');
+            generateBtn.classList.add('bg-green-500', 'hover:bg-green-600', 'shadow-[0_8px_24px_-4px_rgba(0,168,67,0.4)]');
+            setTimeout(() => { closeModal(); }, 1500);
+        }
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const icon = type === 'success' ? '<i class="fa-solid fa-check text-green-600"></i>' : '<i class="fa-solid fa-info text-blue-600"></i>';
+            const bgColor = type === 'success' ? 'bg-green-100' : 'bg-blue-100';
+            const borderColor = type === 'success' ? 'border-green-200' : 'border-blue-200';
+
+            toast.className = `toast bg-white border ${borderColor} shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-2xl p-4 flex items-start gap-4 w-80 mb-2`;
+            toast.innerHTML = `<div class="w-8 h-8 rounded-full ${bgColor} flex items-center justify-center shrink-0 mt-0.5">${icon}</div><div><h4 class="text-sm font-bold text-gray-900">${title}</h4><p class="text-xs text-gray-500 mt-1 leading-relaxed">${message}</p></div>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 3500);
+        }
+
+        // ==========================================
+        // ЛОГИКА КРЕДИТ/ДЕБЕТ
+        // ==========================================
+        let isDebitCreditView = false;
+        function toggleCreditDebit() {
+            const list = document.getElementById('transactionsList');
+            const table = document.getElementById('creditDebitTable');
+            const title = document.getElementById('panelTitle');
+            const filters = document.getElementById('filterButtons');
+            const actionBtn = document.getElementById('panelActionBtn');
+
+            isDebitCreditView = !isDebitCreditView;
+
+            if (isDebitCreditView) {
+                list.classList.add('hidden');
+                filters.style.opacity = '0';
+                setTimeout(() => filters.classList.add('hidden'), 300);
+
+                table.classList.remove('hidden');
+                table.classList.add('flex');
+
+                title.innerHTML = 'Оборотно-сальдовая ведомость';
+                actionBtn.innerHTML = '<i class="fa-solid fa-file-pdf mr-2"></i> Скачать ведомость (PDF)';
+            } else {
+                table.classList.add('hidden');
+                table.classList.remove('flex');
+
+                list.classList.remove('hidden');
+                filters.classList.remove('hidden');
+                setTimeout(() => filters.style.opacity = '1', 50);
+
+                title.innerHTML = 'Лента операций';
+                actionBtn.innerHTML = 'Показать все операции';
+            }
+        }
+
+        function filterTransactions(type, btnElement) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.className = 'px-4 py-1.5 text-gray-500 font-medium text-xs hover:text-alfa-dark transition rounded-lg filter-btn');
+            btnElement.className = 'px-4 py-1.5 bg-white text-alfa-dark font-semibold text-xs rounded-lg shadow-sm filter-btn';
+
+            const items = document.querySelectorAll('.transaction-item');
+            items.forEach(item => {
+                item.style.display = 'none';
+                if (type === 'all' || item.getAttribute('data-type') === type) {
+                    item.style.display = 'flex';
+                    item.style.animation = 'none';
+                    item.offsetHeight;
+                    item.style.animation = 'fadeIn 0.3s ease-out forwards';
+                }
+            });
+        }
+
+        function generateAIAct() {
+            const btn = document.getElementById('aiActBtn');
+            if (btn.classList.contains('processing')) return;
+            btn.classList.add('processing');
+            btn.innerHTML = `<span class="spinner !border-green-700 !border-t-transparent"></span> <span>Генерация...</span>`;
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> <span>Акт №42-ПР готов</span>`;
+                btn.classList.remove('bg-white/60', 'hover:bg-white', 'text-green-900');
+                btn.classList.add('bg-green-600', 'text-white', 'hover:bg-green-700');
+                showToast('Документ создан ИИ', 'Акт представительских расходов на 85 000 ₽ успешно сформирован и сохранен в ваш ЭДО.');
+            }, 1800);
+        }
+
+        function sendTax() {
+            const btn = document.getElementById('taxSendBtn');
+            const statusLabel = document.getElementById('taxStatus');
+            if (btn.classList.contains('processing')) return;
+            btn.classList.add('processing');
+            btn.innerHTML = '<span class="spinner !border-alfa-red !border-t-transparent !w-3 !h-3"></span> Подписываем...';
+            btn.classList.replace('text-alfa-red', 'text-gray-500');
+            btn.classList.remove('hover:underline');
+            setTimeout(() => {
+                btn.innerHTML = 'Отправлено в ФНС';
+                btn.classList.replace('text-gray-500', 'text-green-600');
+                btn.onclick = null;
+                statusLabel.innerHTML = 'Успешно';
+                statusLabel.classList.replace('text-gray-600', 'text-green-700');
+                statusLabel.classList.replace('border-gray-200', 'border-green-200');
+                statusLabel.classList.add('bg-green-100');
+                showToast('Уведомление отправлено', 'Документ подписан вашей УКЭП (КЭП) и успешно передан в налоговую службу.', 'success');
+            }, 1500);
+        }
+
+        // ==========================================
+        // ИНТЕРАКТИВНАЯ ТЕПЛОВАЯ КАРТА (Leaflet + Heatmap)
+        // ==========================================
+        document.addEventListener("DOMContentLoaded", function () {
+            const map = L.map('heatmapContainer', {
+                zoomControl: false
+            }).setView([55.751244, 37.618423], 11);
+
+            // Убираем префикс Leaflet (и флаг вместе с ним)
+            map.attributionControl.setPrefix(false);
+
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors & CARTO',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            const heatPoints = [];
+            for (let i = 0; i < 400; i++) {
+                let lat = 55.751244 + (Math.random() - 0.5) * 0.25;
+                let lng = 37.618423 + (Math.random() - 0.5) * 0.4;
+                let intensity = Math.random();
+                heatPoints.push([lat, lng, intensity]);
+            }
+
+            L.heatLayer(heatPoints, {
+                radius: 22,
+                blur: 15,
+                maxZoom: 12,
+                gradient: {
+                    0.2: '#FFEBEA',
+                    0.4: '#fca5a5',
+                    0.7: '#ef4444',
+                    1.0: '#EF3124'
+                }
+            }).addTo(map);
+        });
+    </script>
+</body>
+</html>
