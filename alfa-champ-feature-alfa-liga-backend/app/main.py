@@ -95,6 +95,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        # Ensure ORM models are imported so Base.metadata includes all tables (e.g., KnowledgeBaseEntry)
+        import app.models  # noqa: F401
+
         db.create_schema()
         with db.session_factory() as session:
             seed_demo_data(session)
