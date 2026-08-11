@@ -13,7 +13,11 @@ down_revision = '20260809_0001_initial'
 branch_labels = None
 def upgrade() -> None:
     # Enable pgvector extension (no-op on DBs that lack it)
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    try:
+        op.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    except Exception:
+        # Some DBs (SQLite) do not support CREATE EXTENSION; skip gracefully
+        pass
 
     op.create_table(
         'knowledge_base_entries',
