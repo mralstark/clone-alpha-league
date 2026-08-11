@@ -81,21 +81,39 @@ class BayesianPriorUpdater:
         return mu_new, sigma_new, stats
 
     def fetch_historical_facts(self, session: Session) -> dict[str, list[float]]:
-        """Извлечение фактических приростов метрик из таблицы decision_logs."""
-        stmt = select(
-            DecisionLog.sprint_id,
-            DecisionLog.target_metric,
-            DecisionLog.actual_delta,
-        ).where(DecisionLog.actual_delta.isnot(None))
+        """Извлечение фактических приростов метрик из таблицы экспериментов (Experiment + ExperimentOutcome).
 
-        result = session.execute(stmt)
-        rows = result.all()
+        Ожидаем, что Experiment.action содержит сериализованный CandidateSpec (dict) с keys 'sprint_id' и 'target_metric'.
+        Из ExperimentOutcome.actual_outcome берем поле 'actual_target_delta' (если есть).
+        """
+        from app.models import Experiment, ExperimentOutcome
+        stmt = select(Experiment, ExperimentOutcome).join(
+            ExperimentOutcome, ExperimentOutcome.experiment_id == Experiment.id
+        )
+        result = session.execute(stmt).all()
 
         facts: dict[str, list[float]] = {}
-        for sprint_id, target_metric, actual_delta in rows:
-            key = f"{sprint_id}:{target_metric}"
+        for experiment, outcome in result:
             try:
-                facts.setdefault(key, []).append(float(actual_delta))
+                action = experiment.action or {}
+                sprint_id = action.get("sprint_id")
+                target_metric = action.get("target_metric")
+                if not sprint_id or not target_metric:
+                    continue
+                actual = outcome.actual_outcome or {}
+                # prefer actual_target_delta when available
+                if isinstance(actual, dict) and actual.get("actual_target_delta") is not None:
+                    value = float(actual.get("actual_target_delta"))
+                # fallback: try revenue/profit deltas if target not present
+                elif isinstance(actual, dict) and actual.get("actual_revenue_delta") is not None:
+                    value = float(actual.get("actual_revenue_delta"))
+                elif isinstance(actual, dict) and actual.get("actual_profit_delta") is not None:
+                    value = float(actual.get("actual_profit_delta"))
+                else:
+                    continue
+
+                key = f"{sprint_id}:{target_metric}"
+                facts.setdefault(key, []).append(value)
             except Exception:
                 continue
 
