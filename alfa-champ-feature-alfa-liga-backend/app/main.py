@@ -95,6 +95,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        # Ensure ORM models are imported so Base.metadata includes all tables (e.g., KnowledgeBaseEntry)
+        import app.models  # noqa: F401
+
         db.create_schema()
         with db.session_factory() as session:
             seed_demo_data(session)
@@ -158,7 +161,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
         return response
 
+    # Ensure DB schema exists and demo data seeded even if lifespan isn't entered (tests rely on this)
+    import app.models  # noqa: F401
+    db.create_schema()
+    with db.session_factory() as session:
+        seed_demo_data(session)
+
     return app
 
-
+# Module-level FastAPI instance for convenience (some test fixtures import the package 'app')
+# Create with default settings so `import app` exposes an application with .state attributes.
 app = create_app()
+

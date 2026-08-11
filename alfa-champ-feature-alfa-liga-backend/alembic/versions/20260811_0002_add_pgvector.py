@@ -9,11 +9,15 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '20260811_0002'
-down_revision = '20260809_0001_initial'
+down_revision = '20260809_0001'
 branch_labels = None
 def upgrade() -> None:
     # Enable pgvector extension (no-op on DBs that lack it)
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    try:
+        op.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    except Exception:
+        # Some DBs (SQLite) do not support CREATE EXTENSION; skip gracefully
+        pass
 
     op.create_table(
         'knowledge_base_entries',
@@ -27,7 +31,7 @@ def upgrade() -> None:
         sa.Column('action_items', sa.JSON(), nullable=False),
         sa.Column('associated_products', sa.JSON(), nullable=False),
         # Use vector type for embeddings in Postgres
-        sa.Column('embedding', sa.Text(), nullable=False),
+        sa.Column('embedding', sa.JSON(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
 
