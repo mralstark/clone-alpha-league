@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Альфа-Лига | Дашборд</title>
-
+    
     <!-- Подключение шрифта Inter (максимально похож на Alfa Sans) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+    
     <!-- Подключение иконок FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <!-- Подключение Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    
     <!-- Настройка брендовых цветов Tailwind -->
     <script>
         tailwind.config = {
@@ -70,19 +70,19 @@
 
         /* Стили для рулетки */
         .roulette-container {
-            height: 500px;
+            height: 500px; 
             overflow: hidden;
             position: relative;
             mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
         }
-
+        
         .roulette-track {
             display: flex;
             flex-direction: column;
             gap: 16px;
             /* Плавность управляется через JS */
-            transition: none;
+            transition: none; 
             will-change: transform;
         }
 
@@ -125,7 +125,7 @@
 
     <!-- КОНТЕЙНЕР ДЛЯ ШАПКИ И КОНТЕНТА -->
     <div class="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 flex flex-col gap-8 z-10">
-
+        
         <!-- Шапка (Header) -->
         <header class="w-full flex items-center justify-between bg-white p-4 rounded-2xl shadow-soft shrink-0">
             <div class="flex items-center gap-4">
@@ -135,9 +135,8 @@
                 <h1 class="text-2xl font-bold tracking-tight">
                     <span class="text-alfa-red border-b-4 border-alfa-red pb-1">Альфа</span>-лига
                 </h1>
-                <span data-api-state="loading" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" title="Загрузка данных бизнеса"></span>
             </div>
-
+            
             <div class="flex items-center gap-6">
                 <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-500">
                     <a href="https://alfabank.ru/sme/ip/" target="_blank" class="hover:text-alfa-dark transition flex flex-col items-center gap-1"><i class="fa-solid fa-house"></i>Главный</a>
@@ -155,27 +154,36 @@
 
             <!-- ЛЕВАЯ КОЛОНКА -->
             <div class="md:col-span-4 flex flex-col gap-6">
+                
+                <!-- Блок быстрого доступа к сервисам -->
+                <div class="flex flex-col gap-4">
+                    <!-- Карточка: Бухгалтерия -->
+                    <a href="alfa-accounting.html" class="block bg-gradient-to-br from-[#E2F5E2] to-[#C9EBC9] rounded-[24px] p-6 shadow-soft card-hover relative overflow-hidden cursor-pointer group">
+                        <div class="absolute right-4 top-4 text-green-700 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="fa-solid fa-arrow-right text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-bold mb-2 relative z-10 text-green-900">Цифровая бухгалтерия:</h2>
+                        <p class="text-green-800 font-medium relative z-10 text-lg">Ваш доход:<br> <span class="font-bold text-alfa-dark">320 500 ₽</span></p>
+                        <div class="absolute -right-4 -bottom-4 text-6xl opacity-80 z-0 drop-shadow-md group-hover:scale-110 transition-transform">🧮</div>
+                    </a>
 
-                <!-- Карточка: Бухгалтерия -->
-                <a href="alfa-accounting.html" class="block bg-gradient-to-br from-[#E2F5E2] to-[#C9EBC9] rounded-[24px] p-6 shadow-soft card-hover relative overflow-hidden cursor-pointer group">
-                    <div class="absolute right-4 top-4 text-green-700 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <i class="fa-solid fa-arrow-right text-xl"></i>
-                    </div>
-                    <h2 class="text-xl font-bold mb-2 relative z-10 text-green-900">Цифровая бухгалтерия:</h2>
-                    <p class="text-green-800 font-medium relative z-10 text-lg">Ваш доход:<br> <span id="leagueRevenue" class="font-bold text-alfa-dark">Загрузка…</span></p>
-                    <div class="absolute -right-4 -bottom-4 text-6xl opacity-80 z-0 drop-shadow-md group-hover:scale-110 transition-transform">🧮</div>
-                </a>
-
-                <!-- Карточка: ИИ Ассистент -->
-                <a href="alfa-assistant.html" class="bg-gradient-to-br from-[#FFD6D6] to-[#FFBABA] rounded-[20px] p-5 shadow-soft card-hover flex items-center justify-between cursor-pointer w-full group">
-                    <div class="flex items-center gap-4">
-                        <div class="text-4xl drop-shadow-md group-hover:scale-110 transition-transform">🤖</div>
-                        <span class="font-bold text-lg text-red-950 leading-tight">Ваш ИИ<br>ассистент</span>
-                    </div>
-                    <div class="w-10 h-10 bg-white/50 rounded-full flex items-center justify-center text-red-500 group-hover:bg-white transition-colors">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </div>
-                </a>
+                    <!-- Карточка: AI-Моделирование (ведет на ассистента) -->
+                    <a href="alfa-assistant.html" class="block bg-gradient-to-br from-[#2E1065] to-[#4C1D95] rounded-[24px] p-6 shadow-soft card-hover relative overflow-hidden cursor-pointer group">
+                        <div class="absolute right-4 top-4 text-purple-300 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <i class="fa-solid fa-arrow-right text-xl"></i>
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center text-white backdrop-blur-md border border-white/20 shadow-sm">
+                                    <i class="fa-solid fa-brain text-sm"></i>
+                                </div>
+                                <h2 class="text-xl font-bold text-white tracking-tight">AI-Моделирование</h2>
+                            </div>
+                            <p class="text-purple-200 font-medium text-sm leading-relaxed pr-6 drop-shadow-sm">Моделирование рынка и прогнозирование продаж на базе AI</p>
+                        </div>
+                        <div class="absolute -right-4 -bottom-3 text-7xl opacity-30 z-0 drop-shadow-2xl group-hover:scale-110 transition-transform mix-blend-overlay">📈</div>
+                    </a>
+                </div>
 
                 <!-- Карточка: Лидерборд -->
                 <div class="bg-white rounded-[24px] p-6 shadow-soft flex flex-col">
@@ -266,11 +274,11 @@
                             </div>
                         </div>
                     </div>
-
+                    
                     <div class="flex justify-center py-2 opacity-30 my-1">
                         <i class="fa-solid fa-ellipsis-vertical text-gray-500 text-lg"></i>
                     </div>
-
+                    
                     <!-- Текущий пользователь (Вы) -->
                     <div class="flex items-center justify-between p-3 rounded-xl bg-alfa-lightRed border border-red-100 shadow-sm cursor-pointer card-hover relative overflow-hidden">
                         <div class="flex items-center gap-3 relative z-10">
@@ -301,7 +309,7 @@
                             <span class="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse"></span> 12 онлайн
                         </span>
                     </div>
-
+                    
                     <div class="flex-1 overflow-y-auto flex flex-col gap-3 pr-2 mb-4" id="leagueChatMessages">
                         <div class="flex gap-2 w-full">
                             <div class="w-7 h-7 bg-red-100 text-alfa-red rounded-full flex items-center justify-center text-[10px] shrink-0 mt-1">
@@ -326,7 +334,7 @@
 
             <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА (Миссии) -->
             <div class="md:col-span-4 flex flex-col gap-6">
-
+                
                 <!-- Миссия 1 -->
                 <div class="bg-gradient-to-br from-[#DDF1FF] to-[#BFE3FF] rounded-[24px] p-6 shadow-soft relative overflow-hidden card-hover">
                     <div class="flex justify-between items-start mb-2">
@@ -373,15 +381,15 @@
                      <div class="absolute right-4 bottom-4 text-6xl drop-shadow-md z-0">🏪</div>
                 </div>
 
-                <!-- Миссия 3 -->
+                <!-- Миссия 3 (Бывшее моделирование, оставлено как факт выполнения квеста, но с отсылкой к сервису) -->
                 <div class="bg-gradient-to-br from-[#F3E8FF] to-[#E9D5FF] rounded-[24px] p-6 shadow-soft relative overflow-hidden card-hover">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-xl font-bold w-2/3">Моделирование рынка</h3>
+                        <h3 class="text-xl font-bold w-2/3">Использование AI-Моделирования</h3>
                         <div class="bg-white/70 backdrop-blur px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 text-purple-600">
                             <i class="fa-solid fa-check text-purple-500"></i> Выполнено
                         </div>
                     </div>
-                    <p class="text-sm text-gray-700 font-medium w-2/3 mb-6">Смоделируйте 5 сценариев при разных условиях.</p>
+                    <p class="text-sm text-gray-700 font-medium w-2/3 mb-6">Смоделируйте 5 сценариев при разных условиях в новом сервисе.</p>
                     <div class="mb-4">
                         <div class="flex justify-between text-sm font-bold mb-2">
                             <span>5 / 5 сценариев</span>
@@ -423,11 +431,11 @@
 
             <!-- ПРАВАЯ КОЛОНКА -->
             <div class="md:col-span-4 flex flex-col gap-6">
-
+                
                 <!-- БЛОК 1: Рулетка -->
                 <div class="bg-white rounded-[24px] p-6 shadow-soft flex flex-col h-[680px] relative overflow-hidden">
                     <div class="flex flex-col items-center justify-center mb-6 shrink-0">
-                        <h2 class="text-2xl font-bold text-center relative z-10">Испытайте удачу!<br><span class="text-sm text-gray-500 font-medium">Крутите барабан и забирайте призы</span></h2>
+                        <h2 class="text-2xl font-bold text-center relative z-10">Выиграйте бонусы для своего бизнеса!<br><span class="text-sm text-gray-500 font-medium">Крутите барабан и забирайте призы</span></h2>
                         <div class="mt-3 bg-red-50 text-alfa-red px-4 py-2 rounded-full text-sm font-bold border border-red-100 flex items-center gap-2 shadow-sm">
                             <i class="fa-solid fa-ticket"></i> У вас 2 попытки (демо)
                         </div>
@@ -446,7 +454,7 @@
                     <button id="spinBtn" class="w-full bg-gradient-to-r from-alfa-red to-[#d02419] text-white font-bold text-lg py-4 rounded-[16px] transition-all shadow-[0_8px_20px_rgba(239,49,36,0.3)] mt-auto z-20 hover:scale-[1.02] hover:shadow-[0_12px_25px_rgba(239,49,36,0.4)] active:scale-95 shrink-0">
                         Крутить скорее!
                     </button>
-
+                    
                     <!-- Сообщение о выигрыше -->
                     <div id="winMessage" class="absolute inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 rounded-[24px] opacity-0 pointer-events-none transition-opacity duration-500 z-40">
                         <div class="text-7xl mb-6 animate-bounce" id="winIcon">🎉</div>
@@ -467,7 +475,7 @@
                             2 приза
                         </span>
                     </div>
-
+                    
                     <div class="flex-1 overflow-y-auto flex flex-col gap-3 pr-2" id="wonPrizesList">
                         <!-- Заполняется через JS -->
                     </div>
@@ -604,18 +612,18 @@
     <!-- Модальное окно с промокодом -->
     <div id="promoModal" class="fixed inset-0 z-50 bg-alfa-dark/40 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-white rounded-[24px] p-6 w-[90%] max-w-sm shadow-2xl transform scale-95 transition-transform duration-300 relative" id="promoModalContent">
-
+            
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold">Информация о призе</h3>
                 <button onclick="closePromoModal()" class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-500 hover:text-alfa-red hover:bg-red-50 transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-
+            
             <div class="flex items-center gap-4 mb-6 p-4 rounded-xl bg-gray-50 border border-gray-100" id="promoPrizeInfo">
                 <!-- Контент заполняется из JS -->
             </div>
-
+            
             <div class="mb-6">
                 <p class="text-sm text-gray-500 mb-2 font-medium">Ваш уникальный промокод:</p>
                 <div class="flex items-center justify-between bg-white border-2 border-gray-100 rounded-xl p-3 shadow-inner">
@@ -628,22 +636,20 @@
                     <i class="fa-solid fa-check mr-1"></i> Скопировано в буфер обмена!
                 </p>
             </div>
-
+            
             <div class="bg-blue-50 p-3 rounded-xl flex items-start gap-3 mb-6 border border-blue-100">
                 <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
                 <p class="text-xs text-blue-900 leading-relaxed">
                     Скопируйте код и введите его в разделе «Бонусы» в приложении Альфа-Банка, либо продиктуйте личному менеджеру.
                 </p>
             </div>
-
+            
             <button onclick="closePromoModal()" class="w-full py-3 bg-alfa-red text-white font-bold rounded-xl hover:bg-red-600 transition shadow-[0_4px_12px_rgba(239,49,36,0.3)] hover:-translate-y-0.5">
                 Отлично, спасибо!
             </button>
         </div>
     </div>
 
-    <script src="alfa-api.js"></script>
-    <script src="alfa-dashboard.js"></script>
     <script>
         // --- ДАННЫЕ И СОСТОЯНИЯ ---
         const prizesData = [
@@ -660,7 +666,7 @@
         ];
 
         let wonPrizes = [
-            { ...prizesData[0], date: 'Сегодня' },
+            { ...prizesData[0], date: 'Сегодня' }, 
             { ...prizesData[7], date: 'Вчера' }
         ];
 
@@ -668,7 +674,7 @@
         const spinBtn = document.getElementById('spinBtn');
         const track = document.getElementById('rouletteTrack');
         const winMessage = document.getElementById('winMessage');
-
+        
         let isSpinning = false;
         let isIdle = true;
         let lastWonPrize = null;
@@ -676,17 +682,17 @@
 
         // Строгая математика на основе размеров Tailwind-классов (h-[90px] + gap-4(16px))
         const ITEM_HEIGHT = 90;
-        const ITEM_GAP = 16;
+        const ITEM_GAP = 16; 
         const STRIDE = ITEM_HEIGHT + ITEM_GAP; // 106px - точный размер одного шага
         const CYCLE_LENGTH = prizesData.length; // 10 элементов
         const CYCLE_HEIGHT = CYCLE_LENGTH * STRIDE; // 1060px - точная высота одного цикла
         const CONTAINER_HEIGHT = 500;
         const BASE_OFFSET = (CONTAINER_HEIGHT / 2) - (ITEM_HEIGHT / 2); // 205px - точка центровки
-
+        
         const TOTAL_CYCLES = 50; // Генерируем 500 лотов (хватит для кручения без пустот)
         const START_CYCLE = 20;  // Начинаем с 20-го цикла, чтобы сверху всегда были сотни элементов
 
-        let currentY = 0;
+        let currentY = 0; 
         let targetY = 0;
 
         function getTierStyle(tier) {
@@ -717,12 +723,12 @@
                     track.appendChild(item);
                 });
             }
-
+            
             // Устанавливаем положение строго на 20-й цикл, чтобы пустота (верх контейнера) была недостижима
             currentY = BASE_OFFSET - (START_CYCLE * CYCLE_HEIGHT);
             track.style.transition = 'none';
             track.style.transform = `translateY(${currentY}px)`;
-
+            
             renderWonPrizes();
             requestAnimationFrame(idleLoop);
         }
@@ -730,7 +736,7 @@
         function idleLoop() {
             if (isIdle) {
                 currentY -= 0.6; // Скорость режима ожидания
-
+                
                 // Как только мы проехали ровно один полный цикл (10 элементов) вперед
                 const limitY = BASE_OFFSET - ((START_CYCLE + 1) * CYCLE_HEIGHT);
                 if (currentY <= limitY) {
@@ -764,7 +770,7 @@
             if (isSpinning) return;
             isSpinning = true;
             isIdle = false;
-
+            
             spinBtn.textContent = "Крутим барабан...";
             spinBtn.classList.add('opacity-70', 'cursor-not-allowed', 'from-gray-500', 'to-gray-700');
             spinBtn.classList.remove('hover:scale-[1.02]', 'hover:shadow-[0_12px_25px_rgba(239,49,36,0.4)]', 'from-alfa-red', 'to-[#d02419]');
@@ -774,11 +780,11 @@
 
             const winningPrizeIndex = getRandomPrizeIndex();
             lastWonPrize = prizesData[winningPrizeIndex];
-
+            
             // Крутим вперед на 10 циклов от начальной позиции
-            const targetCycle = START_CYCLE + 10;
+            const targetCycle = START_CYCLE + 10; 
             targetIndexGlobal = (targetCycle * CYCLE_LENGTH) + winningPrizeIndex;
-
+            
             // Точный пиксельный расчет до целевого приза
             targetY = BASE_OFFSET - (targetIndexGlobal * STRIDE);
 
@@ -787,15 +793,15 @@
 
             setTimeout(() => {
                 updateActiveItem(targetIndexGlobal);
-
+                
                 const styles = getTierStyle(lastWonPrize.tier);
                 document.getElementById('winIcon').innerHTML = lastWonPrize.icon;
                 document.getElementById('winTitle').innerText = lastWonPrize.text;
                 document.getElementById('winSub').innerText = lastWonPrize.sub || '';
-
+                
                 const winCard = document.getElementById('winCard');
                 winCard.className = `p-6 rounded-2xl w-full text-center shadow-lg mb-8 transform scale-110 ${styles.wrap}`;
-
+                
                 setTimeout(() => {
                     winMessage.classList.remove('opacity-0', 'pointer-events-none');
                 }, 600);
@@ -805,13 +811,13 @@
 
         function resetRoulette() {
             winMessage.classList.add('opacity-0', 'pointer-events-none');
-
+            
             if(lastWonPrize) {
                 wonPrizes.unshift({ ...lastWonPrize, date: 'Только что' });
                 renderWonPrizes();
                 lastWonPrize = null;
             }
-
+            
             const items = document.querySelectorAll('.prize-item');
             items.forEach(item => item.classList.remove('active'));
 
@@ -820,24 +826,24 @@
                 spinBtn.textContent = "Крутить еще раз!";
                 spinBtn.classList.remove('opacity-70', 'cursor-not-allowed', 'from-gray-500', 'to-gray-700');
                 spinBtn.classList.add('hover:scale-[1.02]', 'hover:shadow-[0_12px_25px_rgba(239,49,36,0.4)]', 'from-alfa-red', 'to-[#d02419]');
-
+                
                 // БЕСШОВНЫЙ СБРОС (ТЕЛЕПОРТ):
                 // Вычисляем, какой по счету (от 0 до 9) был выигранный лот.
                 const winningPrizeIndex = targetIndexGlobal % CYCLE_LENGTH;
-
+                
                 // Ставим рулетку обратно на START_CYCLE на абсолютно тот же по виду лот,
                 // поэтому визуально позиция не меняется ни на миллиметр.
                 currentY = BASE_OFFSET - (START_CYCLE * CYCLE_HEIGHT) - (winningPrizeIndex * STRIDE);
-
+                
                 // Отключаем плавность, чтобы телепорт был моментальным
                 track.style.transition = 'none';
                 track.style.transform = `translateY(${currentY}px)`;
-
+                
                 // Принудительно заставляем браузер применить координаты до возврата к анимации
-                void track.offsetHeight;
-
+                void track.offsetHeight; 
+                
                 // Запускаем гладкую прокрутку ожидания
-                isIdle = true;
+                isIdle = true; 
             }, 300);
         }
 
@@ -845,10 +851,10 @@
         function renderWonPrizes() {
             const list = document.getElementById('wonPrizesList');
             const badge = document.getElementById('prizesCountBadge');
-
+            
             badge.innerText = `${wonPrizes.length} приза`;
             list.innerHTML = '';
-
+            
             if(wonPrizes.length === 0) {
                 list.innerHTML = '<div class="text-center text-gray-400 text-sm mt-10">Вы пока ничего не выиграли.<br>Крутите рулетку!</div>';
                 return;
@@ -857,10 +863,10 @@
             wonPrizes.forEach((prize) => {
                 const styles = getTierStyle(prize.tier);
                 const item = document.createElement('div');
-
+                
                 item.className = 'flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition cursor-pointer border border-gray-100 bg-white shadow-sm card-hover shrink-0';
                 item.onclick = () => openPromoModal(prize);
-
+                
                 item.innerHTML = `
                     <div class="w-12 h-12 rounded-lg flex items-center justify-center text-xl shrink-0 ${styles.icon} shadow-sm border border-gray-100/50">${prize.icon}</div>
                     <div class="flex flex-col flex-1 overflow-hidden">
@@ -880,10 +886,10 @@
             const modalContent = document.getElementById('promoModalContent');
             const prizeInfo = document.getElementById('promoPrizeInfo');
             const promoCodeText = document.getElementById('promoCodeText');
-
+            
             document.getElementById('copySuccessMsg').classList.remove('opacity-100');
             document.getElementById('copySuccessMsg').classList.add('opacity-0');
-
+            
             const styles = getTierStyle(prize.tier);
             prizeInfo.innerHTML = `
                 <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 ${styles.icon} shadow-sm border border-gray-100">${prize.icon}</div>
@@ -892,12 +898,12 @@
                     <span class="text-xs text-gray-500">${prize.sub || 'Подарок от Альфа-лиги'}</span>
                 </div>
             `;
-
+            
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = 'ALFA-';
             for(let i=0; i<6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
             promoCodeText.innerText = code;
-
+            
             modal.classList.remove('opacity-0', 'pointer-events-none');
             setTimeout(() => {
                 modalContent.classList.remove('scale-95');
@@ -908,10 +914,10 @@
         function closePromoModal() {
             const modal = document.getElementById('promoModal');
             const modalContent = document.getElementById('promoModalContent');
-
+            
             modalContent.classList.remove('scale-100');
             modalContent.classList.add('scale-95');
-
+            
             setTimeout(() => {
                 modal.classList.add('opacity-0', 'pointer-events-none');
             }, 200);
@@ -923,14 +929,13 @@
                 const msg = document.getElementById('copySuccessMsg');
                 msg.classList.remove('opacity-0');
                 msg.classList.add('opacity-100');
-
+                
                 setTimeout(() => {
                     msg.classList.remove('opacity-100');
                     msg.classList.add('opacity-0');
                 }, 2000);
             });
         }
-
 
         // --- ЛОГИКА ДЛЯ ЧАТА ЛИГИ ---
         const leagueChatInput = document.getElementById('leagueChatInput');
@@ -947,7 +952,7 @@
             const msgWrapper = document.createElement('div');
             msgWrapper.className = 'flex gap-2 self-end flex-row-reverse w-full';
             msgWrapper.style.animation = 'fadeInMsg 0.3s ease-out forwards';
-
+            
             msgWrapper.innerHTML = `
                 <div class="w-7 h-7 bg-alfa-lightRed rounded-full flex items-center justify-center text-alfa-red text-[10px] font-bold shrink-0 mt-1 border border-red-100 shadow-sm">А</div>
                 <div class="bg-alfa-red text-white px-3 py-2 rounded-2xl rounded-tr-sm shadow-md max-w-[85%]">
@@ -963,7 +968,7 @@
                 const replyWrapper = document.createElement('div');
                 replyWrapper.className = 'flex gap-2 w-full';
                 replyWrapper.style.animation = 'fadeInMsg 0.3s ease-out forwards';
-
+                
                 replyWrapper.innerHTML = `
                     <div class="w-7 h-7 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center text-[10px] shrink-0 mt-1 shadow-sm">
                         <i class="fa-solid fa-user"></i>

@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Альфа-Лига | Цифровая Бухгалтерия</title>
-
+    
     <!-- Подключение шрифта Inter (максимально близок к Alfa Sans) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+    
     <!-- Иконки FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <!-- Подключение Leaflet для интерактивной карты -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -20,7 +20,7 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    
     <!-- Настройка брендовых цветов Tailwind -->
     <script>
         tailwind.config = {
@@ -140,7 +140,7 @@
             transform: translateX(0);
             opacity: 1;
         }
-
+        
         /* Спиннер загрузки */
         .spinner {
             border: 2px solid rgba(255,255,255,0.3);
@@ -162,7 +162,7 @@
 
     <!-- КОНТЕЙНЕР ДЛЯ ШАПКИ И КОНТЕНТА -->
     <div class="flex-1 w-full p-4 md:p-8 flex flex-col z-10">
-
+        
         <!-- Шапка -->
         <header class="max-w-7xl w-full mx-auto flex items-center justify-between mb-8 bg-white p-4 rounded-2xl shadow-soft relative">
             <div class="flex items-center gap-4">
@@ -172,9 +172,8 @@
                 <h1 class="text-xl md:text-2xl font-bold tracking-tight">
                     <span class="text-alfa-red border-b-4 border-alfa-red pb-1">Цифровая</span> Бухгалтерия
                 </h1>
-                <span data-api-state="loading" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" title="Загрузка данных бизнеса"></span>
             </div>
-
+            
             <div class="flex items-center gap-4">
                 <div class="hidden md:flex flex-col text-right mr-2">
                     <span class="text-sm font-bold">Алексей П.</span>
@@ -188,33 +187,49 @@
 
         <!-- Основной контент -->
         <main class="max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
-
+            
             <!-- ВЕРХНИЙ РЯД: KPI (3 Карточки) -->
             <div class="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6 animate-slide-up">
-                <!-- Баланс -->
-                <div class="bg-gray-900 rounded-[24px] p-6 shadow-soft text-white relative overflow-hidden card-hover">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl -translate-y-10 translate-x-10"></div>
-                    <div class="flex justify-between items-start mb-4 relative z-10">
-                        <span class="text-gray-400 font-medium text-sm">Доступно на счетах</span>
-                        <i class="fa-brands fa-cc-visa text-2xl text-gray-400"></i>
+                
+                <!-- 1. Доходы / Расходы (Приоритет 1 - слева) -->
+                <div class="bg-white rounded-[24px] p-6 shadow-soft card-hover flex flex-col justify-between relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-gray-500 font-medium text-sm flex items-center gap-2">
+                            Оборот в июне
+                            <span class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 border border-purple-200">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> AI-прогноз
+                            </span>
+                        </span>
+                        <div class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-400">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
                     </div>
-                    <h2 id="accountingBalance" class="text-3xl lg:text-4xl font-bold mb-1 relative z-10">Загрузка…</h2>
-                    <div class="flex items-center gap-2 text-sm text-green-400 font-semibold relative z-10">
-                        <i class="fa-solid fa-wallet"></i> <span id="accountingRunway">Загрузка состояния</span>
+                    <div class="flex justify-between items-end border-b border-gray-100 pb-2 mb-2">
+                        <span class="text-sm font-semibold text-gray-500">Доходы:</span>
+                        <span class="text-lg font-bold text-green-600">+ 320 500 ₽</span>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <span class="text-sm font-semibold text-gray-500">Расходы:</span>
+                        <span class="text-lg font-bold text-gray-900">- 140 200 ₽</span>
                     </div>
                 </div>
 
-                <!-- Налоговая копилка -->
+                <!-- 2. Налоговая копилка (Центр) -->
                 <div class="bg-gradient-to-br from-[#FFEBEA] to-white rounded-[24px] p-6 shadow-soft border border-red-50 card-hover relative overflow-hidden">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-alfa-red font-bold flex items-center gap-2 text-sm">
                             <i class="fa-solid fa-vault"></i> Налоговая копилка
                         </span>
-                        <span class="bg-white px-2 py-1 rounded-md text-[10px] font-bold text-gray-500 shadow-sm border border-gray-100">АВТО</span>
+                        <div class="flex gap-1">
+                            <span class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm border border-purple-200 flex items-center gap-1">
+                                <i class="fa-solid fa-robot"></i> AI-расчет
+                            </span>
+                            <span class="bg-white px-2 py-1 rounded-md text-[10px] font-bold text-gray-500 shadow-sm border border-gray-100">АВТО</span>
+                        </div>
                     </div>
                     <div class="flex items-end gap-2 mb-4">
-                        <h2 id="accountingTaxReserve" class="text-2xl lg:text-3xl font-bold text-alfa-dark">Загрузка…</h2>
-                        <span id="accountingTaxPlan" class="text-sm text-gray-500 font-medium mb-1"></span>
+                        <h2 class="text-2xl lg:text-3xl font-bold text-alfa-dark">87 000 ₽</h2>
+                        <span class="text-sm text-gray-500 font-medium mb-1">/ 95 000 ₽ план</span>
                     </div>
                     <div class="h-2.5 w-full bg-red-100 rounded-full overflow-hidden mb-3">
                         <div class="h-full bg-alfa-red rounded-full progress-fill" style="width: 91%;"></div>
@@ -222,21 +237,16 @@
                     <p class="text-xs text-gray-600 font-medium leading-tight">Мы автоматически откладываем 6% с каждого поступления. Вы готовы к налогам!</p>
                 </div>
 
-                <!-- Доходы / Расходы -->
-                <div class="bg-white rounded-[24px] p-6 shadow-soft card-hover flex flex-col justify-between">
-                    <div class="flex justify-between items-start mb-4">
-                        <span id="accountingWindow" class="text-gray-500 font-medium text-sm">Оборот за период</span>
-                        <div class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-400">
-                            <i class="fa-solid fa-chart-pie"></i>
-                        </div>
+                <!-- 3. Баланс (Доступно на счетах - Стратегический остаток - справа) -->
+                <div class="bg-gray-900 rounded-[24px] p-6 shadow-soft text-white relative overflow-hidden card-hover">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl -translate-y-10 translate-x-10"></div>
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <span class="text-gray-400 font-medium text-sm">Доступно на счетах</span>
+                        <i class="fa-brands fa-cc-visa text-2xl text-gray-400"></i>
                     </div>
-                    <div class="flex justify-between items-end border-b border-gray-100 pb-2 mb-2">
-                        <span class="text-sm font-semibold text-gray-500">Доходы:</span>
-                        <span id="accountingRevenue" class="text-lg font-bold text-green-600">Загрузка…</span>
-                    </div>
-                    <div class="flex justify-between items-end">
-                        <span class="text-sm font-semibold text-gray-500">Расходы:</span>
-                        <span id="accountingExpenses" class="text-lg font-bold text-gray-900">Загрузка…</span>
+                    <h2 class="text-3xl lg:text-4xl font-bold mb-1 relative z-10">1 450 000 ₽</h2>
+                    <div class="flex items-center gap-2 text-sm text-green-400 font-semibold relative z-10">
+                        <i class="fa-solid fa-arrow-trend-up"></i> +12.5% за месяц
                     </div>
                 </div>
             </div>
@@ -335,7 +345,9 @@
                                 <span class="text-[10px] text-gray-400 font-medium">10 Июня</span>
                             </div>
                         </div>
-                        <div class="transaction-item flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-100" data-type="income">
+                        
+                        <!-- Скрытые элементы на мобильных устройствах -->
+                        <div class="transaction-item hidden md:flex mobile-hidden justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-100" data-type="income">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-lg shrink-0">
                                     <i class="fa-solid fa-arrow-down"></i>
@@ -350,7 +362,7 @@
                                 <span class="text-[10px] text-gray-400 font-medium">8 Июня</span>
                             </div>
                         </div>
-                        <div class="transaction-item flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-100" data-type="expense">
+                        <div class="transaction-item hidden md:flex mobile-hidden justify-between items-center p-3 hover:bg-gray-50 rounded-xl transition cursor-pointer border border-transparent hover:border-gray-100" data-type="expense">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-full bg-[#FFEBEA] text-alfa-red flex items-center justify-center text-lg shrink-0 border border-red-100">
                                     <i class="fa-solid fa-mug-hot"></i>
@@ -407,9 +419,9 @@
                             </tfoot>
                         </table>
                     </div>
-
-                    <button id="panelActionBtn" class="w-full mt-4 py-3 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold text-sm rounded-xl transition">
-                        Показать все операции
+                    
+                    <button id="panelActionBtn" onclick="toggleMobileTransactions()" class="w-full mt-4 py-3 bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold text-sm rounded-xl transition md:hidden">
+                        Раскрыть ленту
                     </button>
                 </div>
             </div>
@@ -470,7 +482,7 @@
                 <div class="bg-white rounded-[24px] p-6 shadow-soft flex flex-col gap-4">
                     <div class="flex justify-between items-center">
                         <h2 class="text-xl font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-map-location-dot text-alfa-red"></i>
+                            <i class="fa-solid fa-map-location-dot text-alfa-red"></i> 
                             География клиентского трафика
                         </h2>
                         <span class="text-[10px] font-bold text-alfa-red bg-alfa-lightRed border border-red-100 px-3 py-1.5 rounded-lg tracking-wide">
@@ -622,13 +634,13 @@
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
-
+            
             <div class="p-6 flex flex-col gap-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Контрагент (ИНН или Название)</label>
                     <input type="text" placeholder="Введите ИНН..." value="ООО «Ромашка» (ИНН 7701234567)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-alfa-red/30 focus:border-alfa-red transition font-medium">
                 </div>
-
+                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Сумма (₽)</label>
@@ -661,8 +673,6 @@
     <!-- Контейнер для всплывающих уведомлений -->
     <div id="toastContainer" class="toast-container"></div>
 
-    <script src="alfa-api.js"></script>
-    <script src="alfa-dashboard.js"></script>
     <script>
         // ==========================================
         // БАЗОВАЯ ЛОГИКА (Модалки, ИИ, Toasts)
@@ -702,9 +712,10 @@
         }
 
         // ==========================================
-        // ЛОГИКА КРЕДИТ/ДЕБЕТ
+        // ЛОГИКА КРЕДИТ/ДЕБЕТ И МОБИЛЬНОЙ ЛЕНТЫ
         // ==========================================
         let isDebitCreditView = false;
+        
         function toggleCreditDebit() {
             const list = document.getElementById('transactionsList');
             const table = document.getElementById('creditDebitTable');
@@ -718,28 +729,58 @@
                 list.classList.add('hidden');
                 filters.style.opacity = '0';
                 setTimeout(() => filters.classList.add('hidden'), 300);
-
+                
                 table.classList.remove('hidden');
                 table.classList.add('flex');
-
+                
                 title.innerHTML = 'Оборотно-сальдовая ведомость';
+                actionBtn.classList.remove('md:hidden');
+                actionBtn.onclick = null;
                 actionBtn.innerHTML = '<i class="fa-solid fa-file-pdf mr-2"></i> Скачать ведомость (PDF)';
             } else {
                 table.classList.add('hidden');
                 table.classList.remove('flex');
-
+                
                 list.classList.remove('hidden');
                 filters.classList.remove('hidden');
                 setTimeout(() => filters.style.opacity = '1', 50);
-
+                
                 title.innerHTML = 'Лента операций';
-                actionBtn.innerHTML = 'Показать все операции';
+                actionBtn.classList.add('md:hidden');
+                actionBtn.onclick = toggleMobileTransactions;
+                actionBtn.innerHTML = 'Раскрыть ленту';
+                
+                // Сброс состояния аккордеона транзакций на мобильных
+                const hiddenItems = document.querySelectorAll('.mobile-hidden');
+                hiddenItems.forEach(item => {
+                    item.classList.add('hidden', 'md:flex');
+                    item.classList.remove('flex');
+                });
             }
+        }
+
+        function toggleMobileTransactions() {
+            const hiddenItems = document.querySelectorAll('.mobile-hidden');
+            const btn = document.getElementById('panelActionBtn');
+            
+            let isExpanded = false;
+            hiddenItems.forEach(item => {
+                if (item.classList.contains('hidden')) {
+                    item.classList.remove('hidden', 'md:flex');
+                    item.classList.add('flex');
+                    isExpanded = true;
+                } else {
+                    item.classList.add('hidden', 'md:flex');
+                    item.classList.remove('flex');
+                }
+            });
+            
+            btn.innerHTML = isExpanded ? 'Свернуть ленту' : 'Раскрыть ленту';
         }
 
         function filterTransactions(type, btnElement) {
             const buttons = document.querySelectorAll('.filter-btn');
-            buttons.forEach(btn => btn.className = 'px-4 py-1.5 text-gray-500 font-medium text-xs hover:text-alfa-dark transition rounded-lg filter-btn');
+            buttons.forEach(btn => btn.className = 'px-4 py-1.5 text-gray-500 font-medium text-xs hover:text-alfa-dark transition rounded-lg filter-btn'); 
             btnElement.className = 'px-4 py-1.5 bg-white text-alfa-dark font-semibold text-xs rounded-lg shadow-sm filter-btn';
 
             const items = document.querySelectorAll('.transaction-item');
@@ -748,12 +789,15 @@
                 if (type === 'all' || item.getAttribute('data-type') === type) {
                     item.style.display = 'flex';
                     item.style.animation = 'none';
-                    item.offsetHeight;
+                    item.offsetHeight; 
                     item.style.animation = 'fadeIn 0.3s ease-out forwards';
                 }
             });
         }
 
+        // ==========================================
+        // ИМИТАЦИЯ AI-СОВЕТНИКА
+        // ==========================================
         function generateAIAct() {
             const btn = document.getElementById('aiActBtn');
             if (btn.classList.contains('processing')) return;
@@ -794,7 +838,7 @@
             const map = L.map('heatmapContainer', {
                 zoomControl: false
             }).setView([55.751244, 37.618423], 11);
-
+            
             // Убираем префикс Leaflet (и флаг вместе с ним)
             map.attributionControl.setPrefix(false);
 
