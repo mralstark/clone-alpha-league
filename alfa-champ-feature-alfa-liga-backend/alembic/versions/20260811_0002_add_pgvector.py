@@ -31,7 +31,7 @@ def upgrade() -> None:
         sa.Column('action_items', sa.JSON(), nullable=False),
         sa.Column('associated_products', sa.JSON(), nullable=False),
         # Use vector type for embeddings in Postgres
-        sa.Column('embedding', sa.Text(), nullable=False),
+        sa.Column('embedding', sa.JSON(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
 
