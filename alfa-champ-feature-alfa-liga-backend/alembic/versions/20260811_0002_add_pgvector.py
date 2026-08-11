@@ -9,7 +9,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '20260811_0002'
-down_revision = '20260809_0001_initial'
+down_revision = '20260809_0001'
 branch_labels = None
 def upgrade() -> None:
     # Enable pgvector extension (no-op on DBs that lack it)
