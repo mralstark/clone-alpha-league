@@ -169,7 +169,4 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     return app
 
-# Module-level FastAPI instance for convenience (some test fixtures import the package 'app')
-# Create with default settings so `import app` exposes an application with .state attributes.
-app = create_app()
 
