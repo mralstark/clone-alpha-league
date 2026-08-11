@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Альфа-Лига | Регистрация бизнеса</title>
+    
+    <!-- Подключение шрифта Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Иконки FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Настройка брендовых цветов Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        alfa: {
+                            red: '#EF3124',
+                            dark: '#1A1A1A',
+                            gray: '#F4F5F7',
+                            lightRed: '#FFEBEA',
+                            green: '#00A843'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 12px 24px -8px rgba(0, 0, 0, 0.08)',
+                        'panel': '0 0 40px -10px rgba(0, 0, 0, 0.15)',
+                        'red-glow': '0 8px 24px -4px rgba(239, 49, 36, 0.4)',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F4F5F7;
+            color: #1A1A1A;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Убираем стрелки у числовых полей */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* Стили для интерактивных радио-карточек */
+        .radio-card-input:checked + .radio-card-content {
+            border-color: #EF3124;
+            background-color: #FFEBEA;
+            box-shadow: 0 4px 12px rgba(239, 49, 36, 0.1);
+        }
+        
+        .radio-card-input:checked + .radio-card-content .radio-icon {
+            color: #EF3124;
+            background-color: #fff;
+            border-color: #EF3124;
+        }
+        
+        .radio-card-input:checked + .radio-card-content .check-indicator {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .check-indicator {
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Декоративные фоновые элементы (свечение) */
+        .bg-glow-red {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(239,49,36,0.15) 0%, rgba(239,49,36,0) 70%);
+            top: -100px;
+            left: -200px;
+            z-index: -1;
+            border-radius: 50%;
+        }
+        
+        .bg-glow-purple {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(139,92,246,0.1) 0%, rgba(139,92,246,0) 70%);
+            bottom: -100px;
+            right: -100px;
+            z-index: -1;
+            border-radius: 50%;
+        }
+
+        /* Спиннер загрузки для кнопки */
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid #fff;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .btn-loading .spinner { display: inline-block; }
+        .btn-loading .btn-text { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center relative p-4">
+
+    <!-- Фоновые декорации -->
+    <div class="bg-glow-red"></div>
+    <div class="bg-glow-purple"></div>
+
+    <main class="w-full max-w-2xl bg-white rounded-[32px] shadow-panel overflow-hidden relative z-10 animate-fade-in-up">
+        
+        <!-- Шапка формы -->
+        <div class="px-8 pt-10 pb-6 text-center border-b border-gray-100 relative">
+            <div class="absolute top-8 left-8 text-2xl font-black text-alfa-red tracking-tighter">А</div>
+            <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 mb-2">Регистрация в Лиге</h1>
+            <p class="text-gray-500 text-sm md:text-base font-medium">Заполните профиль бизнеса, чтобы получить доступ к AI-инструментам и бонусам.</p>
+        </div>
+
+        <!-- Тело формы -->
+        <form id="registrationForm" class="px-6 md:px-10 py-8 flex flex-col gap-8">
+            
+            <!-- Секция 1: Тип бизнеса (ООО / ИП) -->
+            <div class="flex flex-col gap-3">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">1. Правовая форма</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- ИП -->
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="entityType" value="IP" class="absolute opacity-0 radio-card-input" checked>
+                        <div class="radio-card-content h-full border-2 border-gray-100 rounded-2xl p-4 flex items-start gap-3 transition-all hover:border-gray-300 bg-white">
+                            <div class="radio-icon w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 shrink-0 transition-colors">
+                                <i class="fa-solid fa-user-tie"></i>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-gray-900">ИП</span>
+                                <span class="text-xs text-gray-500 mt-0.5 leading-tight">Индивидуальный предприниматель</span>
+                            </div>
+                            <div class="check-indicator absolute top-4 right-4 text-alfa-red text-lg">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                        </div>
+                    </label>
+                    
+                    <!-- ООО -->
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="entityType" value="OOO" class="absolute opacity-0 radio-card-input">
+                        <div class="radio-card-content h-full border-2 border-gray-100 rounded-2xl p-4 flex items-start gap-3 transition-all hover:border-gray-300 bg-white">
+                            <div class="radio-icon w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 shrink-0 transition-colors">
+                                <i class="fa-solid fa-building"></i>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-gray-900">ООО</span>
+                                <span class="text-xs text-gray-500 mt-0.5 leading-tight">Юридическое лицо</span>
+                            </div>
+                            <div class="check-indicator absolute top-4 right-4 text-alfa-red text-lg">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Секция 2: Базовые данные -->
+            <div class="flex flex-col gap-4">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-1">2. Данные компании</h3>
+                
+                <div class="relative">
+                    <label class="absolute -top-2.5 left-4 bg-white px-1.5 text-xs font-bold text-gray-500 transition-colors z-10">ИНН</label>
+                    <input type="number" id="inn" required placeholder="Введите 10 или 12 цифр" class="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-4 focus:ring-alfa-red/10 focus:border-alfa-red transition font-medium text-gray-900 relative z-0">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="relative">
+                        <label class="absolute -top-2.5 left-4 bg-white px-1.5 text-xs font-bold text-gray-500 transition-colors z-10">Название / ФИО</label>
+                        <input type="text" id="companyName" required placeholder="ООО «Альфа» или Иванов И.И." class="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-4 focus:ring-alfa-red/10 focus:border-alfa-red transition font-medium text-gray-900 relative z-0">
+                    </div>
+                    <div class="relative">
+                        <label class="absolute -top-2.5 left-4 bg-white px-1.5 text-xs font-bold text-gray-500 transition-colors z-10">Телефон</label>
+                        <input type="tel" id="phone" required placeholder="+7 (999) 000-00-00" class="w-full bg-white border-2 border-gray-200 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-4 focus:ring-alfa-red/10 focus:border-alfa-red transition font-medium text-gray-900 relative z-0">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Секция 3: Ниша бизнеса (Радио-карточки сеткой) -->
+            <div class="flex flex-col gap-3">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">3. Отрасль бизнеса</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    
+                    <!-- HoReCa -->
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="niche" value="horeca" class="absolute opacity-0 radio-card-input" required>
+                        <div class="radio-card-content border-2 border-gray-100 rounded-xl p-3 flex items-center gap-3 transition-all hover:border-gray-300 bg-white">
+                            <div class="radio-icon w-10 h-10 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-lg shrink-0 transition-colors">
+                                <i class="fa-solid fa-mug-hot"></i>
+                            </div>
+                            <span class="font-bold text-sm text-gray-900">HoReCa (Кафе/Отели)</span>
+                            <div class="check-indicator ml-auto text-alfa-red">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- E-commerce -->
+                    <label class="relative cursor-pointer group">
+                        <input type="radio" name="niche" value="ecommerce" class="absolute opacity-0 radio-card-input">
+                        <div class="radio-card-content border-2 border-gray-100 rounded-xl p-3 flex items-center gap-3 transition-all hover:border-gray-300 bg-white">
+                            <div class="radio-icon w-10 h-10 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-lg shrink-0 transition-colors">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </div>
+                            <span class="font-bold text-sm text-gray-900">E-commerce</span>
+                            <div class="check-indicator ml-auto text-alfa-red">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                        </div>
+                    </label>
+
+                    <!-- Beauty -->
+                    <label class="relative cursor-pointer group sm:col-span-2">
+                        <input type="radio" name="niche" value="beauty" class="absolute opacity-0 radio-card-input">
+                        <div class="radio-card-content border-2 border-gray-100 rounded-xl p-3 flex items-center gap-3 transition-all hover:border-gray-300 bg-white">
+                            <div class="radio-icon w-10 h-10 rounded-lg bg-gray-50 text-gray-500 flex items-center justify-center text-lg shrink-0 transition-colors">
+                                <i class="fa-solid fa-scissors"></i>
+                            </div>
+                            <span class="font-bold text-sm text-gray-900">Beauty & SPA</span>
+                            <div class="check-indicator ml-auto text-alfa-red">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-6 border-t border-gray-100">
+                <button type="submit" id="submitBtn" class="w-full bg-alfa-red text-white py-4 rounded-[16px] font-bold text-lg hover:bg-red-600 transition-all shadow-red-glow hover:shadow-[0_12px_28px_rgba(239,49,36,0.5)] hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    <span class="btn-text">Войти в дашборд Альфа-Лиги</span>
+                    <span class="spinner"></span>
+                </button>
+                <p class="text-center text-xs text-gray-400 mt-4 leading-relaxed">
+                    Нажимая кнопку, вы принимаете условия <a href="#" class="text-alfa-red hover:underline">пользовательского соглашения</a> и даете согласие на обработку персональных данных.
+                </p>
+            </div>
+            
+        </form>
+    </main>
+
+    <!-- Простая маска для телефона и обработчик формы -->
+    <script>
+        // Простая маска для поля ввода телефона
+        const phoneInput = document.getElementById('phone');
+        
+        phoneInput.addEventListener('input', function (e) {
+            let x = e.target.value.replace(/\D/g, '').match(/(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+            if (!x[2]) {
+                e.target.value = x[1] === '7' || x[1] === '8' ? '+7 ' : (x[1] ? '+7 (' + x[1] : '');
+            } else {
+                e.target.value = '+7 (' + x[2] + (x[3] ? ') ' + x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
+            }
+        });
+
+        // Визуальная логика фокуса инпутов (подсветка лейбла)
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"]');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.previousElementSibling.classList.add('text-alfa-red');
+            });
+            input.addEventListener('blur', () => {
+                input.previousElementSibling.classList.remove('text-alfa-red');
+            });
+        });
+
+        // Обработка отправки формы
+        const form = document.getElementById('registrationForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Предотвращаем стандартную отправку формы
+            
+            // Валидация (встроенная в HTML5 через required, здесь только проверка для кнопки)
+            if(!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Имитация загрузки и обработки данных
+            submitBtn.classList.add('btn-loading');
+            submitBtn.classList.remove('hover:-translate-y-0.5');
+            
+            // Собираем данные (в реальном проекте отправлялись бы на бэкенд)
+            const formData = new FormData(form);
+            console.log('Тип:', formData.get('entityType'));
+            console.log('ИНН:', document.getElementById('inn').value);
+            console.log('Ниша:', formData.get('niche'));
+
+            // Перенаправление на дашборд через 1.5 секунды
+            setTimeout(() => {
+                window.location.href = 'alfa-league.html';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

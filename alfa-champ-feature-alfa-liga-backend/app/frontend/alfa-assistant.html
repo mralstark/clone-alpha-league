@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Альфа-Лига | ИИ-Ассистент</title>
-
+    
     <!-- Шрифт Inter (Альфа-стиль) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+    
     <!-- Иконки FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    
     <!-- Настройка брендовых цветов Tailwind -->
     <script>
         tailwind.config = {
@@ -82,7 +82,7 @@
         input[type=range]::-webkit-slider-thumb:hover {
             transform: scale(1.1);
         }
-
+        
         input[type=range]::-moz-range-thumb {
             height: 24px;
             width: 24px;
@@ -91,6 +91,16 @@
             border: 3px solid #EF3124;
             cursor: pointer;
             box-shadow: 0 2px 6px rgba(239, 49, 36, 0.3);
+        }
+
+        /* Скрытие стрелок у input type=number */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
         }
 
         /* Анимация чата */
@@ -125,7 +135,7 @@
 
     <!-- КОНТЕЙНЕР ДЛЯ ШАПКИ И КОНТЕНТА -->
     <div class="flex-1 w-full max-w-screen-2xl mx-auto p-4 md:p-6 flex flex-col z-10">
-
+        
         <!-- Верхнее меню (Шапка) -->
         <header class="w-full flex items-center justify-between bg-white p-4 rounded-2xl shadow-soft mb-6 shrink-0 z-20 relative">
             <div class="flex items-center gap-4">
@@ -136,7 +146,7 @@
                     <span class="text-alfa-red border-b-4 border-alfa-red pb-1">AI</span>-Моделирование
                 </h1>
             </div>
-
+            
             <div class="flex items-center gap-4">
                 <div class="hidden md:flex flex-col text-right mr-2">
                     <span class="text-sm font-bold">Алексей П.</span>
@@ -151,42 +161,28 @@
         <!-- Основной контент (Сетка) -->
         <main class="w-full flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[700px] lg:h-[calc(100vh-140px)] relative">
 
-            <!-- ЛЕВАЯ КОЛОНКА (Настройки параметров). Сделали шире: col-span-8 -->
+            <!-- ЛЕВАЯ КОЛОНКА (Настройки параметров) -->
             <div class="lg:col-span-8 flex flex-col bg-white rounded-[24px] shadow-soft overflow-hidden h-full">
-                <div class="p-6 border-b border-gray-100 shrink-0 bg-white z-10 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                <div class="p-6 border-b border-gray-100 shrink-0 bg-white z-10 flex justify-between items-center">
                     <div>
-                        <h2 class="text-2xl font-bold">Сценарий решения</h2>
-                        <p class="text-gray-500 text-sm mt-1">Live-метрики приходят из backend, действия и лимиты задаёте вы</p>
+                        <h2 class="text-2xl font-bold">Параметры стартапа / проекта</h2>
+                        <p class="text-gray-500 text-sm mt-1">Изменяйте показатели (ползунком или вводом) для генерации сценариев</p>
                     </div>
-                    <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
-                        <label for="scenarioType" class="sr-only">Тип сценария</label>
-                        <select id="scenarioType" class="bg-gray-100 border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-alfa-red/30">
-                            <option value="AUTO">Определить по вопросу</option>
-                            <option value="GENERATE">Подобрать 3 идеи</option>
-                            <option value="MORNING_DISCOUNT">Проверить скидку</option>
-                            <option value="REPEAT_BONUS">Проверить бонус</option>
-                            <option value="MICRO_AD_TEST">Проверить рекламу</option>
-                            <option value="PRICE_CHANGE">Проверить цену</option>
-                            <option value="OPENING_HOURS_CHANGE">Проверить часы работы</option>
-                            <option value="PRODUCT_BUNDLE">Проверить набор</option>
-                            <option value="NO_ACTION">Ничего не менять</option>
-                        </select>
-                        <button type="button" onclick="resetSliders()" class="text-sm text-alfa-red font-semibold hover:bg-alfa-lightRed px-4 py-2 rounded-lg transition">
-                            Сбросить
-                        </button>
-                    </div>
+                    <button onclick="resetSliders()" class="text-sm text-alfa-red font-semibold hover:bg-alfa-lightRed px-4 py-2 rounded-lg transition">
+                        Сбросить всё
+                    </button>
                 </div>
-
+                
                 <div class="flex-1 overflow-y-auto p-6" id="slidersContainer">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8" id="slidersGrid">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" id="slidersGrid">
                         <!-- Ползунки сгенерируются в JS -->
                     </div>
                 </div>
             </div>
 
-            <!-- ПРАВАЯ КОЛОНКА (Чат с ИИ). Сделали у́же и плотнее: col-span-4 -->
+            <!-- ПРАВАЯ КОЛОНКА (Чат с ИИ) -->
             <div class="lg:col-span-4 bg-white rounded-[24px] shadow-soft flex flex-col relative overflow-hidden h-full">
-
+                
                 <!-- Шапка чата -->
                 <div class="p-4 md:p-5 border-b border-gray-100 flex items-center justify-between shrink-0 bg-gradient-to-r from-gray-50 to-white">
                     <div class="flex items-center gap-3">
@@ -195,9 +191,8 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-lg leading-tight">Альфа ИИ</h3>
-                            <span class="text-xs text-gray-500 font-semibold flex items-center gap-1">
-                                <span id="apiStatusDot" class="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse"></span>
-                                <span id="apiStatusText">Подключаю backend</span>
+                            <span class="text-xs text-green-500 font-semibold flex items-center gap-1">
+                                <span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> Готов к анализу
                             </span>
                         </div>
                     </div>
@@ -206,15 +201,13 @@
                     </button>
                 </div>
 
-                <!-- Зона сообщений (Теперь прижата к низу) -->
-                <!-- Обертка со скроллом -->
+                <!-- Зона сообщений -->
                 <div class="flex-1 overflow-y-auto p-4 md:p-5 bg-gray-50/50 flex flex-col" id="chatScroll">
-                    <!-- mt-auto отталкивает контейнер с сообщениями в самый низ -->
                     <div class="mt-auto flex flex-col gap-4 w-full" id="chatMessages">
                         <div class="flex gap-3 max-w-[90%] chat-message">
                             <div class="w-8 h-8 rounded-full bg-[#FFD6D6] flex items-center justify-center text-sm shrink-0 mt-1">🤖</div>
                             <div class="bg-white p-4 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100">
-                                <p class="text-sm text-gray-800">Привет! Я ИИ-ассистент Альфа-Банка. Настройте параметры слева и напишите мне, какую цель вы хотите достичь. Например: <br><br><i>"Как увеличить прибыль на 20% к концу года?"</i></p>
+                                <p class="text-sm text-gray-800">Привет! Я ИИ-ассистент Альфа-Банка. Настройте параметры слева и напишите мне, какую цель вы хотите достичь. Например: <br><br><i>"Как масштабироваться при текущей стоимости лида?"</i></p>
                             </div>
                         </div>
                     </div>
@@ -224,13 +217,13 @@
                 <div class="p-4 bg-white border-t border-gray-100 shrink-0">
                     <div class="relative flex items-center">
                         <input type="text" id="chatInput" placeholder="Опишите задачу или вопрос..." class="w-full bg-gray-100 border-none rounded-full py-3.5 pl-5 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-alfa-red/30 transition shadow-inner">
-                        <button type="button" id="sendButton" aria-label="Отправить запрос на моделирование" onclick="sendDataToAI()" class="absolute right-1.5 w-9 h-9 bg-alfa-red text-white rounded-full flex items-center justify-center hover:bg-red-600 transition hover:-translate-y-0.5 shadow-sm disabled:opacity-50 disabled:cursor-wait">
+                        <button onclick="sendDataToAI()" class="absolute right-1.5 w-9 h-9 bg-alfa-red text-white rounded-full flex items-center justify-center hover:bg-red-600 transition hover:-translate-y-0.5 shadow-sm">
                             <i class="fa-solid fa-paper-plane text-sm -ml-0.5"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Выезжающая панель истории (Sidebar) -->
+                <!-- Выезжающая панель истории -->
                 <div id="sidebarOverlay" class="absolute inset-0 sidebar-overlay z-20" onclick="toggleHistory()"></div>
                 <div id="historySidebar" class="absolute top-0 right-0 h-full w-[85%] max-w-[320px] bg-white shadow-panel z-30 history-sidebar flex flex-col">
                     <div class="p-5 border-b border-gray-100 flex items-center justify-between">
@@ -369,7 +362,280 @@
         </div>
     </footer>
 
-    <script src="alfa-api.js"></script>
-    <script src="alfa-assistant.js"></script>
+    <script>
+        // --- 1. ДАННЫЕ: Параметры бизнеса (расширено для молодых предпринимателей) ---
+        const businessParameters = [
+            { id: 'traffic', name: 'Охват / Трафик (в мес)', min: 100, max: 200000, step: 100, value: 5000, currentValue: 5000, unit: 'чел.', format: 'number' },
+            { id: 'cpc', name: 'Стоимость клика (CPC)', min: 1, max: 500, step: 1, value: 25, currentValue: 25, unit: '₽', format: 'money' },
+            { id: 'lead_conversion', name: 'Конверсия в лида', min: 0.1, max: 50, step: 0.1, value: 5, currentValue: 5, unit: '%', format: 'number' },
+            { id: 'sales_conversion', name: 'Конверсия в продажу', min: 1, max: 100, step: 1, value: 20, currentValue: 20, unit: '%', format: 'number' },
+            { id: 'avg_check', name: 'Средний чек (AOV)', min: 500, max: 150000, step: 100, value: 3500, currentValue: 3500, unit: '₽', format: 'money' },
+            { id: 'purchase_freq', name: 'Покупок на клиента (LTV)', min: 1, max: 50, step: 1, value: 2, currentValue: 2, unit: 'шт.', format: 'number' },
+            { id: 'cogs', name: 'Себестоимость (COGS)', min: 5, max: 90, step: 1, value: 40, currentValue: 40, unit: '% от чека', format: 'number' },
+            { id: 'marketing', name: 'Бюджет на рекламу', min: 0, max: 5000000, step: 5000, value: 50000, currentValue: 50000, unit: '₽', format: 'money' },
+            { id: 'commission', name: 'Эквайринг / Маркетплейс', min: 0, max: 30, step: 0.1, value: 2.5, currentValue: 2.5, unit: '%', format: 'number' },
+            { id: 'refunds', name: 'Процент возвратов/брака', min: 0, max: 30, step: 0.5, value: 3, currentValue: 3, unit: '%', format: 'number' },
+            { id: 'payroll', name: 'ФОТ (Команда)', min: 0, max: 3000000, step: 10000, value: 150000, currentValue: 150000, unit: '₽', format: 'money' },
+            { id: 'payroll_taxes', name: 'Налоги с ФОТ', min: 0, max: 50, step: 1, value: 30, currentValue: 30, unit: '%', format: 'number' },
+            { id: 'rent', name: 'Аренда (Офис/Склад)', min: 0, max: 1000000, step: 5000, value: 60000, currentValue: 60000, unit: '₽', format: 'money' },
+            { id: 'it_budget', name: 'IT, Сервисы (SaaS)', min: 0, max: 200000, step: 1000, value: 15000, currentValue: 15000, unit: '₽', format: 'money' },
+            { id: 'logistics', name: 'Логистика / Упаковка', min: 0, max: 500000, step: 1000, value: 20000, currentValue: 20000, unit: '₽', format: 'money' },
+            { id: 'opex', name: 'Прочие расходы (OPEX)', min: 0, max: 500000, step: 1000, value: 10000, currentValue: 10000, unit: '₽', format: 'money' },
+            { id: 'tax_rate', name: 'Налоговая ставка (УСН/ПСН)', min: 0, max: 20, step: 1, value: 6, currentValue: 6, unit: '%', format: 'number' },
+            { id: 'credit', name: 'Платеж по кредиту', min: 0, max: 500000, step: 5000, value: 0, currentValue: 0, unit: '₽', format: 'money' },
+            { id: 'investments', name: 'Свои средства / Инвестиции', min: 0, max: 10000000, step: 50000, value: 500000, currentValue: 500000, unit: '₽', format: 'money' }
+        ];
+
+        // --- 2. ГЕНЕРАЦИЯ ПОЛЗУНКОВ И ПОЛЕЙ ВВОДА ---
+        const grid = document.getElementById('slidersGrid');
+        const slidersMap = {};
+
+        function formatValue(value, format) {
+            if (format === 'money' || value >= 1000) {
+                return parseInt(value).toLocaleString('ru-RU');
+            }
+            return value;
+        }
+
+        businessParameters.forEach(param => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex flex-col gap-1 p-3 bg-gray-50/50 rounded-xl border border-transparent hover:border-gray-200 transition';
+            
+            wrapper.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex flex-col flex-1 pr-2">
+                        <label class="font-semibold text-gray-800 text-sm leading-tight mb-1 whitespace-nowrap overflow-hidden text-ellipsis" title="${param.name}">${param.name}</label>
+                        <span class="text-[11px] text-gray-500 font-medium leading-none">Факт: ${formatValue(param.currentValue, param.format)} ${param.unit}</span>
+                    </div>
+                    <div class="flex flex-col items-end shrink-0 w-[125px]">
+                        <div class="flex items-center gap-1 w-full bg-white border border-gray-200 rounded-lg px-2 py-1 focus-within:border-alfa-red focus-within:ring-1 focus-within:ring-alfa-red transition-all shadow-sm">
+                            <input type="number" id="num_${param.id}" value="${param.value}" min="${param.min}" max="${param.max}" step="${param.step}" 
+                                class="w-full text-right font-bold text-alfa-dark text-sm bg-transparent border-none p-0 focus:ring-0 focus:outline-none appearance-none hide-arrows">
+                            <span class="text-xs font-bold text-gray-500 shrink-0">${param.unit}</span>
+                        </div>
+                        <span class="text-[10px] font-bold h-3 transition-all mt-1" id="diff_${param.id}"></span>
+                    </div>
+                </div>
+                <input type="range" id="slider_${param.id}" min="${param.min}" max="${param.max}" step="${param.step}" value="${param.value}" class="w-full cursor-pointer mt-1">
+            `;
+            grid.appendChild(wrapper);
+
+            const sliderInput = wrapper.querySelector(`#slider_${param.id}`);
+            const numInput = wrapper.querySelector(`#num_${param.id}`);
+            const diffDisplay = wrapper.querySelector(`#diff_${param.id}`);
+            
+            slidersMap[param.id] = { sliderInput, numInput, diffDisplay, config: param };
+
+            const updateSliderUI = (val) => {
+                val = Number(val);
+                const min = Number(param.min);
+                const max = Number(param.max);
+                
+                // Рассчитываем заливку для ползунка, не выходя за пределы 0-100%
+                let percentage = ((val - min) / (max - min)) * 100;
+                if (percentage < 0) percentage = 0;
+                if (percentage > 100) percentage = 100;
+                
+                sliderInput.style.background = `linear-gradient(to right, #EF3124 0%, #EF3124 ${percentage}%, #E5E7EB ${percentage}%, #E5E7EB 100%)`;
+
+                const diff = val - param.currentValue;
+                if (diff > 0) {
+                    diffDisplay.innerText = `+${formatValue(diff, param.format)}`;
+                    diffDisplay.className = "text-[10px] font-bold h-3 text-green-500";
+                } else if (diff < 0) {
+                    diffDisplay.innerText = `${formatValue(diff, param.format)}`;
+                    diffDisplay.className = "text-[10px] font-bold h-3 text-red-500";
+                } else {
+                    diffDisplay.innerText = "Без изменений";
+                    diffDisplay.className = "text-[10px] font-medium h-3 text-gray-400";
+                }
+            };
+
+            // Синхронизация: Ползунок -> Поле ввода
+            sliderInput.addEventListener('input', (e) => {
+                numInput.value = e.target.value;
+                updateSliderUI(e.target.value);
+            });
+
+            // Синхронизация: Поле ввода -> Ползунок (в реальном времени)
+            numInput.addEventListener('input', (e) => {
+                sliderInput.value = e.target.value;
+                updateSliderUI(e.target.value);
+            });
+
+            // Валидация при потере фокуса полем ввода
+            numInput.addEventListener('blur', (e) => {
+                let val = Number(e.target.value);
+                if (val < param.min) val = param.min;
+                if (val > param.max) val = param.max;
+                numInput.value = val;
+                sliderInput.value = val;
+                updateSliderUI(val);
+            });
+
+            updateSliderUI(param.value);
+        });
+
+        function resetSliders() {
+            Object.values(slidersMap).forEach(item => {
+                item.sliderInput.value = item.config.currentValue; 
+                item.numInput.value = item.config.currentValue;
+                item.sliderInput.dispatchEvent(new Event('input')); 
+            });
+        }
+
+        // --- 3. ЛОГИКА ЧАТА ---
+        const chatInput = document.getElementById('chatInput');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatScroll = document.getElementById('chatScroll');
+        const historyList = document.getElementById('historyList');
+
+        let chatSessions = [
+            {
+                id: Date.now().toString(),
+                title: "Новое моделирование",
+                date: "Только что",
+                messages: [
+                    { sender: 'ai', text: 'Привет! Я ИИ-ассистент Альфа-Банка. Настройте параметры слева (вы увидите разницу с вашими текущими показателями) и напишите мне, какую цель вы хотите достичь.' }
+                ]
+            }
+        ];
+        let activeSessionId = chatSessions[0].id;
+
+        chatInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') sendDataToAI();
+        });
+
+        function sendDataToAI() {
+            const text = chatInput.value.trim();
+            if (!text) return; 
+
+            const currentParams = {};
+            Object.values(slidersMap).forEach(item => {
+                currentParams[item.config.id] = {
+                    modeledValue: Number(item.numInput.value), // Берем данные из input
+                    actualValue: item.config.currentValue
+                };
+            });
+
+            const payload = {
+                timestamp: new Date().toISOString(),
+                userQuery: text,
+                businessContext: currentParams
+            };
+
+            const activeSession = chatSessions.find(s => s.id === activeSessionId);
+            
+            if (activeSession.messages.length <= 1) {
+                activeSession.title = text.length > 25 ? text.substring(0, 25) + '...' : text;
+                updateHistoryUI();
+            }
+
+            activeSession.messages.push({ sender: 'user', text: text });
+            renderMessages();
+            chatInput.value = '';
+
+            const jsonString = JSON.stringify(payload, null, 2);
+            
+            setTimeout(() => {
+                activeSession.messages.push({ sender: 'system', text: 'Анализирую измененные параметры относительно базовых...' });
+                renderMessages();
+                
+                setTimeout(() => {
+                    activeSession.messages.pop(); 
+                    const aiResponse = `Я сопоставил ваши текущие показатели с смоделированными. При текущем запросе, расчетная модель показывает следующие выводы.\n\n<b>Сырые данные (JSON) для бэкенда:</b>\n<pre class="bg-gray-800 text-green-400 p-3 rounded-xl text-[10px] overflow-x-auto mt-2 leading-tight">${jsonString}</pre>`;
+                    
+                    activeSession.messages.push({ sender: 'ai', text: aiResponse });
+                    renderMessages();
+                }, 1000);
+            }, 500);
+        }
+
+        function renderMessages() {
+            chatMessages.innerHTML = '';
+            const activeSession = chatSessions.find(s => s.id === activeSessionId);
+            
+            activeSession.messages.forEach(msg => {
+                const wrapper = document.createElement('div');
+                wrapper.className = `flex gap-3 max-w-[90%] chat-message ${msg.sender === 'user' ? 'self-end flex-row-reverse' : 'self-start'}`;
+                
+                let bubble = '';
+                if (msg.sender === 'user') {
+                    bubble = `
+                        <div class="w-8 h-8 rounded-full bg-alfa-lightRed flex items-center justify-center text-sm shrink-0 mt-1 border border-red-100">А</div>
+                        <div class="bg-alfa-red text-white p-3 md:p-4 rounded-2xl rounded-tr-sm shadow-md">
+                            <p class="text-sm">${msg.text}</p>
+                        </div>
+                    `;
+                } else if (msg.sender === 'ai' || msg.sender === 'system') {
+                    bubble = `
+                        <div class="w-8 h-8 rounded-full bg-[#FFD6D6] flex items-center justify-center text-sm shrink-0 mt-1">🤖</div>
+                        <div class="bg-white p-3 md:p-4 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 w-full overflow-hidden">
+                            <p class="text-sm text-gray-800 ${msg.sender === 'system' ? 'text-gray-500 italic' : ''}">${msg.text}</p>
+                        </div>
+                    `;
+                }
+                wrapper.innerHTML = bubble;
+                chatMessages.appendChild(wrapper);
+            });
+            
+            chatScroll.scrollTo({ top: chatScroll.scrollHeight, behavior: 'smooth' });
+        }
+
+        // --- 4. БОКОВОЕ МЕНЮ (ИСТОРИЯ) ---
+        const sidebar = document.getElementById('historySidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        function toggleHistory() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            if (sidebar.classList.contains('active')) updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            historyList.innerHTML = '';
+            const sortedSessions = [...chatSessions].reverse();
+            
+            sortedSessions.forEach(session => {
+                const isActive = session.id === activeSessionId;
+                const btn = document.createElement('button');
+                btn.onclick = () => switchChat(session.id);
+                btn.className = `text-left p-3 rounded-xl transition border ${isActive ? 'bg-alfa-lightRed border-red-200 shadow-sm' : 'hover:bg-gray-50 border-transparent hover:border-gray-200'}`;
+                btn.innerHTML = `
+                    <div class="font-semibold text-sm truncate ${isActive ? 'text-alfa-red' : 'text-gray-800'}">${session.title}</div>
+                    <div class="text-xs ${isActive ? 'text-red-400' : 'text-gray-400'} mt-1 flex justify-between">
+                        <span>${session.date}</span>
+                        <span>${session.messages.length} сообщ.</span>
+                    </div>
+                `;
+                historyList.appendChild(btn);
+            });
+        }
+
+        function switchChat(id) {
+            activeSessionId = id;
+            renderMessages();
+            updateHistoryUI();
+            if (window.innerWidth < 1024) toggleHistory();
+        }
+
+        function createNewChat() {
+            const newId = Date.now().toString();
+            const newSession = {
+                id: newId,
+                title: "Новое моделирование",
+                date: "Только что",
+                messages: [
+                    { sender: 'ai', text: 'Новая сессия начата. Вы можете сбросить параметры бизнеса справа и задать новый вопрос.' }
+                ]
+            };
+            chatSessions.push(newSession);
+            activeSessionId = newId;
+            renderMessages();
+            updateHistoryUI();
+        }
+
+        renderMessages();
+    </script>
 </body>
 </html>
