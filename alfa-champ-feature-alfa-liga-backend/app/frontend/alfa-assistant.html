@@ -543,7 +543,7 @@
                 
                 setTimeout(() => {
                     activeSession.messages.pop(); 
-                    const aiResponse = `Я сопоставил ваши текущие показатели с смоделированными. При текущем запросе, расчетная модель показывает следующие выводы.\n\n<b>Сырые данные (JSON) для бэкенда:</b>\n<pre class="bg-gray-800 text-green-400 p-3 rounded-xl text-[10px] overflow-x-auto mt-2 leading-tight">${jsonString}</pre>`;
+                    const aiResponse = `Я сопоставил ваши текущие показатели с смоделированными. При текущем запросе расчетная модель показывает следующие выводы. Подробные данные отправлены на сервер.`;
                     
                     activeSession.messages.push({ sender: 'ai', text: aiResponse });
                     renderMessages();
