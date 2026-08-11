@@ -11,6 +11,14 @@ from app.db import Base
 
 JSON_VALUE = JSON().with_variant(JSONB, "postgresql")
 
+# Optional pgvector support: use native Vector column in Postgres when available
+try:
+    from pgvector.sqlalchemy import Vector  # type: ignore
+    EMBEDDING_COLUMN_TYPE = Vector(384)
+except Exception:
+    EMBEDDING_COLUMN_TYPE = JSON_VALUE
+
+
 
 def utc_now() -> datetime:
     return datetime.now(UTC)
@@ -172,4 +180,26 @@ class ModelVersion(Base):
     version: Mapped[str] = mapped_column(String(128), nullable=False)
     metadata_json: Mapped[dict[str, Any]] = mapped_column(JSON_VALUE, nullable=False, default=dict)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class KnowledgeBaseEntry(Base):
+    """Векторная запись базы знаний для RAG/K-NN.
+
+    Для тестов на SQLite используем JSON-столбец для эмбеддинга; в Postgres/pgvector
+    модель может быть изменена на pgvector.Vector(384) и использовать SQL K-NN.
+    """
+    __tablename__ = "knowledge_base_entries"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    category: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    okved: Mapped[str | None] = mapped_column(String(32), index=True, nullable=True)
+    target_metric: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
+    seasonality: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    action_items: Mapped[list[dict[str, Any]]] = mapped_column(JSON_VALUE, nullable=False, default=list)
+    associated_products: Mapped[list[str]] = mapped_column(JSON_VALUE, nullable=False, default=list)
+    # embedding column uses Vector(384) on Postgres with pgvector, otherwise JSON for SQLite
+    embedding: Mapped[list[float]] = mapped_column(EMBEDDING_COLUMN_TYPE, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
