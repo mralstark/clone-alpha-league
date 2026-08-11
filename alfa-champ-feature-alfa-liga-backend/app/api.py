@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, BackgroundTasks
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+
+from app.db import Database
+from app.services.prior_updater import BayesianPriorUpdater
 
 from app.schemas import (
     BusinessState,
@@ -214,6 +217,24 @@ def get_experiment(
         return request.app.state.experiment_service.get(session, experiment_id)
     except ExperimentNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Experiment not found") from exc
+
+
+@router.post("/simulations/update-priors", summary="Запуск байесовского обновления priors")
+def trigger_prior_update(
+    background_tasks: BackgroundTasks,
+    request: Request,
+) -> dict:
+    """Вызывает перерасчет априорных распределений в фоне."""
+    db: Database = request.app.state.db
+    updater = BayesianPriorUpdater()
+
+    def _run_task():
+        with db.session_factory() as session:
+            audit = updater.run_update_pipeline(session)
+            print(f"[PriorUpdater] Обновлено параметров для {len(audit)} спринтов.")
+
+    background_tasks.add_task(_run_task)
+    return {"status": "accepted", "detail": "Фоновая задача байесовского обновления запущена."}
 
 
 @router.post("/training/export-replay", response_class=Response)

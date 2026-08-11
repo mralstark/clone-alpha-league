@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
+import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -10,6 +11,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+
+from app.services.prior_updater import BayesianPriorUpdater
 
 from app.api import router
 from app.config import Settings, get_settings
@@ -74,15 +77,41 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     experiment_service = ExperimentService(product_gateway)
 
+    async def scheduled_bayesian_update_loop(app: FastAPI, interval_seconds: int = 86400):
+        """Фоновая задача периодического перерасчета priors."""
+        while True:
+            await asyncio.sleep(interval_seconds)
+            try:
+                db_local = app.state.db
+
+                def _job():
+                    with db_local.session_factory() as session:
+                        updater = BayesianPriorUpdater()
+                        updater.run_update_pipeline(session)
+
+                await asyncio.to_thread(_job)
+            except Exception as e:
+                logger.exception("[PriorUpdater Error] %s", e)
+
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         db.create_schema()
         with db.session_factory() as session:
             seed_demo_data(session)
         logger.info("application_started")
-        yield
-        db.dispose()
-        logger.info("application_stopped")
+
+        # Запуск фонового планировщика (раз в час на демо)
+        task = asyncio.create_task(scheduled_bayesian_update_loop(app, interval_seconds=3600))
+        try:
+            yield
+        finally:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+            db.dispose()
+            logger.info("application_stopped")
 
     app = FastAPI(
         title="Альфа-Лига API",

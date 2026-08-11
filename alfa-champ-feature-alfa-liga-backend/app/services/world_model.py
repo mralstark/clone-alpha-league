@@ -26,12 +26,27 @@ class TemplateWorldModel:
         self.priors_path = (
             priors_path or Path(__file__).parents[1] / "data" / "world_model_priors.yaml"
         )
-        with self.priors_path.open("r", encoding="utf-8") as handle:
-            self.priors: dict[str, dict[str, Any]] = yaml.safe_load(handle)
+        # mtime-aware cache so priors can be updated on-disk and picked up without restart
+        self._last_mtime: float = 0.0
+        self._priors_cache: dict[str, dict[str, Any]] = {}
+        self._reload_priors_if_needed()
+
+    def _reload_priors_if_needed(self) -> None:
+        """Автоматическая перезагрузка конфигурации при обновлении файла на диске."""
+        if not self.priors_path.exists():
+            return
+
+        current_mtime = os.path.getmtime(self.priors_path)
+        if current_mtime > self._last_mtime:
+            with self.priors_path.open("r", encoding="utf-8") as handle:
+                self._priors_cache = yaml.safe_load(handle) or {}
+            self._last_mtime = current_mtime
 
     def infer(self, state: BusinessState, candidate: CandidateSpec) -> WorldModelOutput:
         del state  # Priors consume only the validated action in the deterministic fallback.
-        raw = deepcopy(self.priors[candidate.sprint_id.value])
+        # ensure we have up-to-date priors
+        self._reload_priors_if_needed()
+        raw = deepcopy(self._priors_cache.get(candidate.sprint_id.value, {}))
         effects = [DistributionSpec.model_validate(item) for item in raw.get("effects", [])]
         return WorldModelOutput(
             effects=effects,
